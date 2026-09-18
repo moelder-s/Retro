@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Retro The Cake Lab</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#9C6644;--gold-light:#B08968;--dark:#7F5539;--paper:#EDE0D4;--surface:#FFFFFF;--tan:#E6CCB2;--border:rgba(156,102,68,0.28);--muted:rgba(127,85,57,0.6);--red:#e05555;--green:#4caf7d;}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;min-height:100%;font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--dark);}
+body{
+  overflow-x:hidden;
+  background:
+    radial-gradient(ellipse 900px 600px at 8% -8%, rgba(156,102,68,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 700px 500px at 95% 10%, rgba(176,137,104,0.10) 0%, transparent 55%),
+    radial-gradient(ellipse 800px 700px at 50% 110%, rgba(230,204,178,0.5) 0%, transparent 60%),
+    linear-gradient(165deg, var(--surface) 0%, var(--paper) 55%, var(--tan) 100%);
+}
+
+/* SLIDER */
+.slider{width:100%;min-height:100vh;position:relative;}
+.slide{position:absolute;inset:0;opacity:0;transform:translateX(60px);transition:opacity 0.5s cubic-bezier(.4,0,.2,1),transform 0.5s cubic-bezier(.4,0,.2,1);pointer-events:none;min-height:100vh;}
+.slide.active{position:relative;opacity:1;transform:translateX(0);pointer-events:all;}
+.slide.exit{opacity:0;transform:translateX(-60px);}
+
+/* NAV */
+.nav{display:flex;justify-content:space-between;align-items:center;padding:16px 28px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(237,224,212,0.92);backdrop-filter:blur(12px);z-index:50;gap:16px;}
+.logo{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;letter-spacing:6px;color:var(--gold);white-space:nowrap;}
+.nav-links{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;flex:1;}
+.nav-links::-webkit-scrollbar{display:none;}
+.nav-links button{background:transparent;color:var(--dark);border:1px solid var(--border);padding:7px 14px;border-radius:30px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:11px;letter-spacing:1px;text-transform:uppercase;transition:all 0.25s;white-space:nowrap;flex-shrink:0;}
+.nav-links button:hover,.nav-links button.active{background:var(--gold);color:var(--surface);border-color:var(--gold);font-weight:500;}
+.cart-btn{position:relative;}
+.cart-badge{position:absolute;top:-7px;right:-7px;background:var(--red);color:#fff;border-radius:50%;width:17px;height:17px;font-size:10px;display:flex;align-items:center;justify-content:center;font-weight:700;}
+
+/* HERO */
+#slide-home{background:transparent;}
+.hero{text-align:center;padding:60px 24px 30px;}
+.hero-eye{font-size:11px;letter-spacing:5px;text-transform:uppercase;color:var(--gold);margin-bottom:18px;}
+.hero h1{font-family:'Playfair Display',serif;font-size:clamp(38px,7vw,68px);line-height:1.08;background:linear-gradient(135deg,var(--gold-light),var(--gold),var(--dark));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:14px;}
+.hero p{font-size:14px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;font-weight:300;}
+.hero-line{width:70px;height:1px;background:linear-gradient(to right,transparent,var(--gold),transparent);margin:22px auto;}
+
+/* ADS BANNER */
+.ads-banner{padding:0 28px 20px;}
+.ad-strip{display:flex;gap:12px;overflow-x:auto;padding-bottom:8px;scrollbar-width:none;}
+.ad-strip::-webkit-scrollbar{display:none;}
+.ad-item{flex-shrink:0;background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;width:230px;display:flex;flex-direction:column;}
+.ad-item img{width:100%;height:90px;object-fit:cover;}
+.ad-item-body{padding:10px 12px;}
+.ad-item-tag{font-size:10px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;margin-bottom:3px;}
+.ad-item-title{font-size:13px;font-weight:600;margin-bottom:3px;}
+.ad-item-desc{font-size:11px;color:var(--muted);line-height:1.4;}
+
+/* CATEGORY BROWSE CARDS */
+.cat-browse{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;padding:0 28px 24px;}
+.cat-card{border-radius:16px;padding:22px 16px;text-align:center;cursor:pointer;background:var(--surface);border:1px solid var(--border);transition:all 0.25s;}
+.cat-card:hover{border-color:var(--gold);transform:translateY(-4px);}
+.cat-card .emoji{font-size:30px;margin-bottom:8px;}
+.cat-card h4{font-family:'Playfair Display',serif;font-size:15px;color:var(--gold);}
+
+/* GRID */
+.cat-browse{margin-bottom:20px;}
+
+/* PRODUCT PAGE (categories + party) */
+.prod-body{padding:34px 28px 80px;}
+.page-heading{margin-bottom:24px;}
+.page-heading h2{font-family:'Playfair Display',serif;font-size:30px;color:var(--gold);margin-bottom:5px;}
+.page-heading p{color:var(--muted);font-size:12px;letter-spacing:1px;}
+.prod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:20px;}
+.prod-card{border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:all 0.3s;background:var(--surface);}
+.prod-card:hover{border-color:var(--gold);transform:translateY(-5px);}
+.prod-card img{width:100%;height:160px;object-fit:cover;display:block;cursor:pointer;}
+.prod-card-info{padding:13px 15px 16px;}
+.prod-card-info h3{font-family:'Playfair Display',serif;font-size:16px;margin-bottom:5px;cursor:pointer;}
+.prod-card-info p{font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:9px;min-height:34px;}
+.prod-card-info .price{color:var(--gold);font-weight:500;font-size:14px;}
+.prod-card-btn{width:100%;margin-top:10px;padding:9px;background:linear-gradient(135deg,var(--gold),var(--gold-light));color:var(--surface);border:none;border-radius:7px;font-weight:600;font-size:12px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;}
+.qty-row{display:flex;align-items:center;gap:10px;margin-top:8px;}
+.qty-btn{width:26px;height:26px;border-radius:6px;border:1px solid var(--border);background:var(--paper);color:var(--dark);cursor:pointer;font-size:14px;}
+.qty-val{min-width:18px;text-align:center;font-size:13px;}
+.empty-note{color:var(--muted);font-size:13px;padding:20px 0;}
+
+/* REVIEWS */
+.reviews-section{padding:20px 28px 40px;}
+.reviews-section h3{font-family:'Playfair Display',serif;font-size:22px;color:var(--gold);margin-bottom:16px;}
+.review-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;}
+.review-item{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;}
+.review-stars{color:var(--gold);font-size:13px;letter-spacing:2px;margin-bottom:5px;}
+.review-author{font-size:13px;font-weight:600;margin-bottom:4px;}
+.review-text{font-size:12px;color:var(--muted);line-height:1.6;}
+.review-reply-box{margin-top:10px;background:var(--paper);border-left:3px solid var(--gold);padding:8px 12px;border-radius:0 7px 7px 0;font-size:11px;color:var(--dark);}
+
+/* PRODUCT DETAIL MODAL */
+.pmodal-bg{display:none;position:fixed;inset:0;background:rgba(60,40,25,0.6);z-index:500;align-items:center;justify-content:center;padding:20px;}
+.pmodal-bg.open{display:flex;}
+.pmodal{background:var(--surface);border:1px solid var(--border);border-radius:18px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;padding:26px;position:relative;}
+.pmodal-close{position:absolute;top:14px;right:16px;background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;}
+.pmodal-close:hover{color:var(--red);}
+.pmodal img.main{width:100%;height:220px;object-fit:cover;border-radius:12px;margin-bottom:10px;}
+.pmodal-thumbs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+.pmodal-thumbs img{width:52px;height:52px;object-fit:cover;border-radius:7px;cursor:pointer;border:2px solid transparent;opacity:0.7;}
+.pmodal-thumbs img.active{border-color:var(--gold);opacity:1;}
+.pmodal h3{font-family:'Playfair Display',serif;font-size:22px;color:var(--gold);margin-bottom:6px;}
+.pmodal .desc{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:16px;}
+.size-label{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:8px;}
+.size-opt{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border:1px solid var(--border);border-radius:9px;margin-bottom:8px;cursor:pointer;transition:all 0.2s;}
+.size-opt:hover{border-color:var(--gold-light);}
+.size-opt.selected{border-color:var(--gold);background:var(--paper);}
+.size-opt .lbl{font-size:13px;}
+.size-opt .lbl small{display:block;color:var(--muted);font-size:11px;margin-top:2px;}
+.size-opt .prc{color:var(--gold);font-weight:600;font-size:13px;}
+.pmodal-actions{margin-top:18px;}
+
+/* CART PAGE */
+.cart-body{padding:44px 28px 80px;}
+.cart-inner{max-width:640px;margin:0 auto;}
+.cart-list{margin-bottom:24px;}
+.cart-line{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--border);gap:12px;}
+.cart-line .info{flex:1;}
+.cart-line .info h4{font-size:14px;font-weight:600;margin-bottom:3px;}
+.cart-line .info span{font-size:11px;color:var(--muted);}
+.cart-line .price{color:var(--gold);font-weight:600;font-size:13px;white-space:nowrap;}
+.cart-line .remove{background:none;border:none;color:var(--red);cursor:pointer;font-size:16px;padding:0 4px;}
+.cart-summary{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px 22px;margin-bottom:24px;}
+.sum-row{display:flex;justify-content:space-between;font-size:13px;padding:6px 0;color:var(--muted);}
+.sum-row.total{color:var(--dark);font-size:16px;font-weight:600;border-top:1px solid var(--border);margin-top:8px;padding-top:12px;}
+.sum-row.advance{color:var(--gold);font-weight:600;}
+.order-box{background:var(--surface);border:1px solid var(--border);padding:26px;border-radius:16px;margin-bottom:20px;}
+.order-box h3{font-family:'Playfair Display',serif;font-size:17px;color:var(--gold);margin-bottom:16px;}
+.form-group{margin-bottom:14px;}
+.form-group label{display:block;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px;}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:11px 13px;background:var(--paper);border:1px solid var(--border);border-radius:7px;color:var(--dark);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;appearance:none;transition:border-color 0.3s;}
+.form-group input::placeholder,.form-group textarea::placeholder{color:var(--muted);}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--gold);}
+.form-group textarea{resize:vertical;min-height:60px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.submit-btn{width:100%;padding:13px;background:linear-gradient(135deg,var(--gold),var(--gold-light));color:var(--surface);border:none;border-radius:8px;font-family:'Playfair Display',serif;font-size:15px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:6px;transition:opacity 0.3s,transform 0.2s;}
+.submit-btn:hover{opacity:0.88;transform:translateY(-2px);}
+.star-rating{display:flex;gap:6px;margin-top:4px;}
+.star{font-size:22px;cursor:pointer;color:rgba(156,102,68,0.3);transition:color 0.2s;}
+.star.active,.star:hover{color:var(--gold);}
+.pay-note{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.5;}
+
+.toast{position:fixed;bottom:26px;right:26px;background:var(--gold);color:var(--surface);padding:12px 22px;border-radius:10px;font-weight:600;font-size:13px;box-shadow:0 8px 24px rgba(60,40,25,0.3);z-index:9999;display:none;animation:fadeUp 0.35s ease;max-width:320px;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:rgba(156,102,68,0.3);border-radius:3px;}
+</style>
+</head>
+<body>
+
+<div class="slider">
+
+<!-- ═══════ HOME ═══════ -->
+<div class="slide active" id="slide-home">
+  <nav class="nav">
+    <div class="logo">RETRO</div>
+    <div class="nav-links">
+      <button class="active" data-i="0" onclick="goTo(0)">Home</button>
+      <button data-i="1" onclick="goTo(1)">Birthday</button>
+      <button data-i="2" onclick="goTo(2)">Anniversary</button>
+      <button data-i="3" onclick="goTo(3)">Wedding</button>
+      <button data-i="4" onclick="goTo(4)">Cookies</button>
+      <button data-i="5" onclick="goTo(5)">Party Things</button>
+      <button data-i="6" class="cart-btn" onclick="goTo(6)">Cart <span class="cart-badge" id="cart-badge-0" style="display:none">0</span></button>
+    </div>
+  </nav>
+  <div class="hero">
+    <div class="hero-eye">✦ Est. 2025 · Sri Lanka ✦</div>
+    <h1>Retro The Cake Lab</h1>
+    <p>Luxury Cakes · Freshly Baked · 🍪</p>
+    <div class="hero-line"></div>
+  </div>
+  <div class="ads-banner" id="ads-section" style="display:none">
+    <div class="ad-strip" id="ads-strip"></div>
+  </div>
+  <div class="cat-browse">
+    <div class="cat-card" onclick="goTo(1)"><div class="emoji">🎂</div><h4>Birthday Cakes</h4></div>
+    <div class="cat-card" onclick="goTo(2)"><div class="emoji">💐</div><h4>Anniversary Cakes</h4></div>
+    <div class="cat-card" onclick="goTo(3)"><div class="emoji">💍</div><h4>Wedding Cakes</h4></div>
+    <div class="cat-card" onclick="goTo(4)"><div class="emoji">🍪</div><h4>Cookies</h4></div>
+    <div class="cat-card" onclick="goTo(5)"><div class="emoji">🎈</div><h4>Party Things</h4></div>
+  </div>
+
+</div>
+
+<!-- ═══════ BIRTHDAY ═══════ -->
+<div class="slide" id="slide-cat-1" data-category="Birthday">
+  <nav class="nav">
+    <div class="logo">RETRO</div>
+    <div class="nav-links">
+      <button data-i="0" onclick="goTo(0)">Home</button>
+      <button class="active" data-i="1" onclick="goTo(1)">Birthday</button>
+      <button data-i="2" onclick="goTo(2)">Anniversary</button>
+      <button data-i="3" onclick="goTo(3)">Wedding</button>
+      <button data-i="4" onclick="goTo(4)">Cookies</button>
+      <button data-i="5" onclick="goTo(5)">Party Things</button>
+      <button data-i="6" class="cart-btn" onclick="goTo(6)">Cart <span class="cart-badge" id="cart-badge-1" style="display:none">0</span></button>
+    </div>
+  </nav>
+  <div class="prod-body">
+    <div class="page-heading"><h2>Birthday Cakes 🎂</h2><p>Pick a design, choose a size, and add to cart</p></div>
+    <div class="prod-grid" id="grid-birthday"></div>
+  </div>
+</div>
+
+<!-- ═══════ ANNIVERSARY ═══════ -->
+<div class="slide" id="slide-cat-2" data-category="Anniversary">
+  <nav class="nav">
+    <div class="logo">RETRO</div>
+    <div class="nav-links">
+      <button data-i="0" onclick="goTo(0)">Home</button>
+      <button data-i="1" onclick="goTo(1)">Birthday</button>
+      <button class="active" data-i="2" onclick="goTo(2)">Anniversary</button>
+      <button data-i="3" onclick="goTo(3)">Wedding</button>
+      <button data-i="4" onclick="goTo(4)">Cookies</button>
+      <button data-i="5" onclick="goTo(5)">Party Things</button>
+      <button data-i="6" class="cart-btn" onclick="goTo(6)">Cart <span class="cart-badge" id="cart-badge-2" style="display:none">0</span></button>
+    </div>
+  </nav>
+  <div class="prod-body">
+    <div class="page-heading"><h2>Anniversary Cakes 💐</h2><p>Pick a design, choose a size, and add to cart</p></div>
+    <div class="prod-grid" id="grid-anniversary"></div>
+  </div>
+</div>
+
+<!-- ═══════ WEDDING ═══════ -->
+<div class="slide" id="slide-cat-3" data-category="Wedding">
+  <nav class="nav">
+    <div class="logo">RETRO</div>
+    <div class="nav-links">
+      <button data-i="0" onclick="goTo(0)">Home</button>
+      <button data-i="1" onclick="goTo(1)">Birthday</button>
+      <button data-i="2" onclick="goTo(2)">Anniversary</button>
+      <button class="active" data-i="3" onclick="goTo(3)">Wedding</button>
+      <button data-i="4" onclick="goTo(4)">Cookies</button>
+      <button data-i="5" onclick="goTo(5)">Party Things</button>
+      <button data-i="6" class="cart-btn" onclick="goTo(6)">Cart <span class="cart-badge" id="cart-badge-3" style="display:none">0</span></button>
+    </div>
+  </nav>
+  <div class="prod-body">
+    <div class="page-heading"><h2>Wedding Cakes 💍</h2><p>Pick a design, choose a size, and add to cart</p></div>
+    <div class="prod-grid" id="grid-wedding"></div>
+  </div>
+</div>
+
+<!-- ═══════ COOKIES ═══════ -->
+<div class="slide" id="slide-cat-4" data-category="Cookies">
+  <nav class="nav">
+    <div class="logo">RETRO</div>
+    <div class="nav-links">
+      <button data-i="0" onclick="goTo(0)">Home</button>
+      <button data-i="1" onclick="goTo(1)">Birthday</button>
+      <button data-i="2" onclick="goTo(2)">Anniversary</button>
+      <button data-i="3" onclick="goTo(3)">Wedding</button>
+      <button class="active" data-i="4" onclick="goTo(4)">Cookies</button>
+      <button data-i="5" onclick="goTo(5)">Party Things</button>
+      <button data-i="6" class="cart-btn" onclick="goTo(6)">Cart <span class="cart-badge" id="cart-badge-4" style="display:none">0</span></button>
+    </div>
+  </nav>
+  <div class="prod-body">
+    <div class="page-heading"><h2>Cookies 🍪</h2><p>Freshly baked, boxed to order</p></div>
+    <div class="prod-grid" id="grid-cookies"></div>
+  </div>
+</div>
+
+<!-- ═══════ PARTY THINGS ═══════ -->
+<div class="slide" id="slide-party">
+  <nav class="nav">
+    <div class="logo">RETRO</div>
+    <div class="nav-links">
+      <button data-i="0" onclick="goTo(0)">Home</button>
+      <button data-i="1" onclick="goTo(1)">Birthday</button>
+      <button data-i="2" onclick="goTo(2)">Anniversary</button>
+      <button data-i="3" onclick="goTo(3)">Wedding</button>
+      <button data-i="4" onclick="goTo(4)">Cookies</button>
+      <button class="active" data-i="5" onclick="goTo(5)">Party Things</button>
+      <button data-i="6" class="cart-btn" onclick="goTo(6)">Cart <span class="cart-badge" id="cart-badge-5" style="display:none">0</span></button>
+    </div>
+  </nav>
+  <div class="prod-body">
+    <div class="page-heading"><h2>Party Things 🎈</h2><p>Balloons, candles, sprayers &amp; more — add these to your cake order</p></div>
+    <div class="prod-grid" id="grid-party"></div>
+  </div>
+</div>
+
+<!-- ═══════ CART / CHECKOUT ═══════ -->
+<div class="slide" id="slide-cart">
+  <nav class="nav">
+    <div class="logo">RETRO</div>
+    <div class="nav-links">
+      <button data-i="0" onclick="goTo(0)">Home</button>
+      <button data-i="1" onclick="goTo(1)">Birthday</button>
+      <button data-i="2" onclick="goTo(2)">Anniversary</button>
+      <button data-i="3" onclick="goTo(3)">Wedding</button>
+      <button data-i="4" onclick="goTo(4)">Cookies</button>
+      <button data-i="5" onclick="goTo(5)">Party Things</button>
+      <button class="active cart-btn" data-i="6" onclick="goTo(6)">Cart <span class="cart-badge" id="cart-badge-6" style="display:none">0</span></button>
+    </div>
+  </nav>
+  <div class="cart-body">
+    <div class="cart-inner">
+      <div class="page-heading">
+        <h2>Your Cart &amp; Checkout 📦</h2>
+        <p>Review your order, then pay 50% advance to confirm — pickup only, no delivery</p>
+      </div>
+      <div class="cart-list" id="cart-list"></div>
+      <div class="cart-summary" id="cart-summary" style="display:none">
+        <div class="sum-row"><span>Subtotal</span><span id="sum-subtotal">LKR 0</span></div>
+        <div class="sum-row total"><span>Total</span><span id="sum-total">LKR 0</span></div>
+        <div class="sum-row advance"><span>Advance due now (50%)</span><span id="sum-advance">LKR 0</span></div>
+        <div class="sum-row"><span>Balance on pickup</span><span id="sum-balance">LKR 0</span></div>
+      </div>
+
+      <div class="order-box" id="checkout-box" style="display:none">
+        <h3>Order Details</h3>
+        <div class="form-row">
+          <div class="form-group"><label>Full Name</label><input type="text" id="co-name" placeholder="Your name"></div>
+          <div class="form-group"><label>Contact Number</label><input type="text" id="co-phone" placeholder="07X-XXX-XXXX"></div>
+        </div>
+        <div class="form-group"><label>Special Note (optional)</label><textarea id="co-note" placeholder="Any special instructions..."></textarea></div>
+        <div class="form-group"><label>Custom Design Photo (optional)</label><input type="file" id="co-design" accept="image/*"></div>
+        <div class="form-group">
+          <label>Leave a Review (optional)</label>
+          <div class="star-rating" id="star-rating">
+            <span class="star" data-v="1">★</span>
+            <span class="star" data-v="2">★</span>
+            <span class="star" data-v="3">★</span>
+            <span class="star" data-v="4">★</span>
+            <span class="star" data-v="5">★</span>
+          </div>
+        </div>
+        <div class="form-group" id="review-field" style="display:none">
+          <label>Your Review</label>
+          <textarea id="co-review" placeholder="Tell us about your experience..."></textarea>
+        </div>
+      </div>
+
+      <div class="order-box" id="payment-box" style="display:none">
+        <h3>Advance Payment (Card)</h3>
+        <div class="form-group"><label>Name on Card</label><input type="text" id="card-name" placeholder="As shown on card"></div>
+        <div class="form-group"><label>Card Number</label><input type="text" id="card-number" placeholder="XXXX XXXX XXXX XXXX" maxlength="19"></div>
+        <div class="form-row">
+          <div class="form-group"><label>Expiry</label><input type="text" id="card-expiry" placeholder="MM/YY" maxlength="5"></div>
+          <div class="form-group"><label>CVV</label><input type="text" id="card-cvv" placeholder="•••" maxlength="4"></div>
+        </div>
+        <button class="submit-btn" onclick="submitOrder()">Pay Advance &amp; Confirm Order</button>
+        <div class="pay-note">You're paying 50% of the order total now to confirm your booking. The remaining balance is due on pickup. Card details are used only to process this payment and are not stored.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="reviews-section">
+    <h3>What Our Customers Say</h3>
+    <div class="review-list" id="reviews-list"></div>
+  </div>
+</div>
+
+</div><!-- /slider -->
+
+<!-- ═══════ PRODUCT DETAIL MODAL (cakes) ═══════ -->
+<div class="pmodal-bg" id="pmodal">
+  <div class="pmodal">
+    <button class="pmodal-close" onclick="closePModal()">✕</button>
+    <img class="main" id="pm-main-img" src="" alt="">
+    <div class="pmodal-thumbs" id="pm-thumbs"></div>
+    <h3 id="pm-title"></h3>
+    <div class="desc" id="pm-desc"></div>
+    <div class="size-label">Choose Size</div>
+    <div id="pm-sizes"></div>
+    <div class="qty-row">
+      <span style="font-size:12px;color:var(--muted)">Qty</span>
+      <button class="qty-btn" onclick="pmQty(-1)">−</button>
+      <span class="qty-val" id="pm-qty">1</span>
+      <button class="qty-btn" onclick="pmQty(1)">+</button>
+    </div>
+    <div class="pmodal-actions">
+      <button class="submit-btn" onclick="confirmAddCake()">Add to Cart</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── SLIDER ──────────────────────────────────
+const slides=document.querySelectorAll('.slide');
+let current=0;
+
+function goTo(i){
+  if(i===current){ refreshCurrent(); return; }
+  slides[current].classList.remove('active'); slides[current].classList.add('exit');
+  setTimeout(()=>slides[current].classList.remove('exit'),500);
+  current=i;
+  slides[current].classList.add('active');
+  document.querySelectorAll('.nav-links button[data-i]').forEach(b=>b.classList.toggle('active', parseInt(b.dataset.i)===i));
+  window.scrollTo(0,0);
+  refreshCurrent();
+}
+
+function refreshCurrent(){
+  renderHome(); renderCategory('birthday','Birthday'); renderCategory('anniversary','Anniversary');
+  renderCategory('wedding','Wedding'); renderCategory('cookies','Cookies'); renderParty(); renderCart(); renderReviews();
+  updateCartBadges();
+}
+
+// ─── DATA ────────────────────────────────────
+function getData(k,def){try{return JSON.parse(localStorage.getItem(k))||def;}catch(e){return def;}}
+function setData(k,v){localStorage.setItem(k,JSON.stringify(v));}
+
+function defaultCakes(){return[
+  {id:1,name:'Bunny Cake',category:'Birthday',desc:'Soft vanilla sponge with a sweet bunny topper.',images:['https://images.unsplash.com/photo-1541783245831-57d6fb0926d3?w=600&q=80'],sizes:[{label:'Small 5"',weight:'750g',price:3200},{label:'Medium 6"',weight:'700g-1kg',price:4500},{label:'Regular 6"',weight:'1kg-1.5kg',price:5800},{label:'Large 6"8',weight:'1.5kg-1.75kg',price:6800}]},
+  {id:2,name:'Minion Cake',category:'Birthday',desc:'Fun minion-themed cake, a party favourite.',images:['https://images.unsplash.com/photo-1542826438-bd32f43d626f?w=600&q=80'],sizes:[{label:'Small 5"',weight:'750g',price:3200},{label:'Medium 6"',weight:'700g-1kg',price:4500},{label:'Regular 6"',weight:'1kg-1.5kg',price:5800},{label:'Large 6"8',weight:'1.5kg-1.75kg',price:6800}]},
+  {id:3,name:'Butterfly Cake',category:'Birthday',desc:'Elegant butterflies on a soft buttercream base.',images:['https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=600&q=80'],sizes:[{label:'Small 5"',weight:'750g',price:3200},{label:'Medium 6"',weight:'700g-1kg',price:4500},{label:'Regular 6"',weight:'1kg-1.5kg',price:5800},{label:'Large 6"8',weight:'1.5kg-1.75kg',price:6800}]},
+  {id:4,name:'Princess Cake',category:'Birthday',desc:'A regal cake fit for a little princess.',images:['https://images.unsplash.com/photo-1607478900766-efe13248b125?w=600&q=80'],sizes:[{label:'Small 5"',weight:'750g',price:3200},{label:'Medium 6"',weight:'700g-1kg',price:4500},{label:'Regular 6"',weight:'1kg-1.5kg',price:5800},{label:'Large 6"8',weight:'1.5kg-1.75kg',price:6800}]},
+  {id:5,name:'Golden Anniversary Cake',category:'Anniversary',desc:'Rich chocolate cake with gold leaf accents.',images:['https://images.unsplash.com/photo-1606890737304-57a1ca8a5b62?w=600&q=80'],sizes:[{label:'Small 5"',weight:'750g',price:3800},{label:'Medium 6"',weight:'700g-1kg',price:5200},{label:'Regular 6"',weight:'1kg-1.5kg',price:6600},{label:'Large 6"8',weight:'1.5kg-1.75kg',price:7600}]},
+  {id:6,name:'Rose Anniversary Cake',category:'Anniversary',desc:'Delicate buttercream roses over vanilla sponge.',images:['https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&q=80'],sizes:[{label:'Small 5"',weight:'750g',price:3800},{label:'Medium 6"',weight:'700g-1kg',price:5200},{label:'Regular 6"',weight:'1kg-1.5kg',price:6600},{label:'Large 6"8',weight:'1.5kg-1.75kg',price:7600}]},
+  {id:7,name:'Classic Tiered Wedding Cake',category:'Wedding',desc:'Three-tier white wedding cake, timeless and elegant.',images:['https://images.unsplash.com/photo-1607478900766-efe13248b125?w=600&q=80'],sizes:[{label:'Small (2-tier)',weight:'2kg',price:12000},{label:'Medium (3-tier)',weight:'3.5kg',price:18500},{label:'Large (4-tier)',weight:'5kg',price:26000}]},
+  {id:8,name:'Ivory Rose Wedding Cake',category:'Wedding',desc:'Ivory fondant with hand-piped sugar roses.',images:['https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=600&q=80'],sizes:[{label:'Small (2-tier)',weight:'2kg',price:13500},{label:'Medium (3-tier)',weight:'3.5kg',price:19800},{label:'Large (4-tier)',weight:'5kg',price:27500}]},
+  {id:9,name:'Choc Chip Cookies',category:'Cookies',desc:'Classic chewy chocolate chip cookies, baked fresh.',images:['https://images.unsplash.com/photo-1499636136210-6f4ee915583e?w=600&q=80'],sizes:[{label:'Box of 6',weight:'',price:800},{label:'Box of 12',weight:'',price:1500}]},
+  {id:10,name:'Butter Cookies',category:'Cookies',desc:'Buttery, crumbly, melt-in-your-mouth cookies.',images:['https://images.unsplash.com/photo-1499636136210-6f4ee915583e?w=600&q=80'],sizes:[{label:'Box of 6',weight:'',price:750},{label:'Box of 12',weight:'',price:1400}]},
+];}
+
+function defaultParty(){return[
+  {id:1,name:'Balloons (Set of 10)',desc:'Assorted colour party balloons.',img:'',price:500},
+  {id:2,name:'Birthday Candles',desc:'Pack of standard birthday candles.',img:'',price:150},
+  {id:3,name:'Number Candles',desc:'Choose any single-digit number candle.',img:'',price:250},
+  {id:4,name:'Party Sprayers',desc:'Confetti string sprayers, pack of 2.',img:'',price:400},
+  {id:5,name:'Popup Decorations',desc:'Pop-up "Happy Birthday" banner set.',img:'',price:600},
+  {id:6,name:'Smoke Flares',desc:'Coloured smoke flares for photos, pair.',img:'',price:900},
+];}
+
+const FALLBACK_IMG='https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&q=80';
+function imgOnErr(el){ el.onerror=null; el.src=FALLBACK_IMG; }
+
+function getCakes(){const d=getData('retro_cakes',null);return d||defaultCakes();}
+function getParty(){const d=getData('retro_party',null);return d||defaultParty();}
+function getOrders(){return getData('retro_orders',[]);}
+function getReviews(){return getData('retro_reviews',[]);}
+function getAds(){return getData('retro_ads',[]);}
+function getCart(){return getData('retro_cart',[]);}
+function setCart(c){setData('retro_cart',c);}
+
+// ─── RENDER: HOME ────────────────────────────
+function renderHome(){
+  const ads=getAds();
+  if(ads.length>0){
+    document.getElementById('ads-section').style.display='block';
+    document.getElementById('ads-strip').innerHTML=ads.map(a=>`
+      <div class="ad-item">
+        ${a.img?`<img src="${a.img}" alt="${a.title}" onerror="imgOnErr(this)">`:''}
+        <div class="ad-item-body">
+          <div class="ad-item-tag">${a.tag}</div>
+          <div class="ad-item-title">${a.title}</div>
+          <div class="ad-item-desc">${a.desc}</div>
+        </div>
+      </div>`).join('');
+  } else {
+    document.getElementById('ads-section').style.display='none';
+  }
+}
+
+function minPrice(c){ return Math.min(...c.sizes.map(s=>s.price)); }
+
+// ─── RENDER: CATEGORY GRIDS ──────────────────
+function renderCategory(gridKey, category){
+  const el=document.getElementById('grid-'+gridKey);
+  if(!el) return;
+  const cakes=getCakes().filter(c=>c.category===category);
+  el.innerHTML = cakes.length===0
+    ? '<p class="empty-note">No cakes in this category yet — check back soon!</p>'
+    : cakes.map(c=>`
+    <div class="prod-card">
+      <img src="${(c.images&&c.images[0])||FALLBACK_IMG}" alt="${c.name}" onerror="imgOnErr(this)" onclick="openProductModal(${c.id})">
+      <div class="prod-card-info">
+        <h3 onclick="openProductModal(${c.id})">${c.name}</h3>
+        <p>${c.desc||''}</p>
+        <span class="price">From LKR ${minPrice(c).toLocaleString()}</span>
+        <button class="prod-card-btn" onclick="openProductModal(${c.id})">Select Size &amp; Order</button>
+      </div>
+    </div>`).join('');
+}
+
+// ─── RENDER: PARTY THINGS ─────────────────────
+let partyQty={};
+function renderParty(){
+  const items=getParty();
+  const el=document.getElementById('grid-party');
+  if(!el) return;
+  el.innerHTML = items.map(p=>{
+    if(!(p.id in partyQty)) partyQty[p.id]=1;
+    return `
+    <div class="prod-card">
+      ${p.img?`<img src="${p.img}" alt="${p.name}" onerror="imgOnErr(this)">`:`<div style="height:160px;background:#E6CCB2;display:flex;align-items:center;justify-content:center;font-size:40px">🎈</div>`}
+      <div class="prod-card-info">
+        <h3>${p.name}</h3>
+        <p>${p.desc||''}</p>
+        <span class="price">LKR ${p.price.toLocaleString()}</span>
+        <div class="qty-row">
+          <button class="qty-btn" onclick="changePartyQty(${p.id},-1)">−</button>
+          <span class="qty-val" id="pqty-${p.id}">${partyQty[p.id]}</span>
+          <button class="qty-btn" onclick="changePartyQty(${p.id},1)">+</button>
+        </div>
+        <button class="prod-card-btn" onclick="addPartyToCart(${p.id})">Add to Cart</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function changePartyQty(id,d){
+  partyQty[id]=Math.max(1,(partyQty[id]||1)+d);
+  const s=document.getElementById('pqty-'+id); if(s) s.textContent=partyQty[id];
+}
+function addPartyToCart(id){
+  const item=getParty().find(p=>p.id===id);
+  if(!item) return;
+  const qty=partyQty[id]||1;
+  const cart=getCart();
+  const existing=cart.find(c=>c.type==='party'&&c.refId===id);
+  if(existing){ existing.qty+=qty; } else {
+    cart.push({cartId:Date.now()+Math.random(),type:'party',refId:id,name:item.name,unitPrice:item.price,qty});
+  }
+  setCart(cart);
+  updateCartBadges();
+  showToast(item.name+' added to cart!');
+}
+
+// ─── PRODUCT MODAL (cakes) ───────────────────
+let pmState={cakeId:null,sizeIdx:0,qty:1};
+function openProductModal(id){
+  const c=getCakes().find(x=>x.id===id);
+  if(!c) return;
+  pmState={cakeId:id,sizeIdx:0,qty:1};
+  document.getElementById('pm-title').textContent=c.name;
+  document.getElementById('pm-desc').textContent=c.desc||'';
+  const imgs=(c.images&&c.images.length)?c.images:[FALLBACK_IMG];
+  document.getElementById('pm-main-img').src=imgs[0];
+  document.getElementById('pm-main-img').onerror=function(){imgOnErr(this)};
+  document.getElementById('pm-thumbs').innerHTML=imgs.map((im,i)=>`<img src="${im}" class="${i===0?'active':''}" onerror="imgOnErr(this)" onclick="pmSetImg(${i},this)">`).join('');
+  document.getElementById('pm-sizes').innerHTML=c.sizes.map((s,i)=>`
+    <div class="size-opt ${i===0?'selected':''}" data-i="${i}" onclick="pmSetSize(${i})">
+      <div class="lbl">${s.label}${s.weight?`<small>${s.weight}</small>`:''}</div>
+      <div class="prc">LKR ${s.price.toLocaleString()}</div>
+    </div>`).join('');
+  document.getElementById('pm-qty').textContent='1';
+  document.getElementById('pmodal').classList.add('open');
+}
+function pmSetImg(i,el){
+  const imgs=getCakes().find(c=>c.id===pmState.cakeId).images;
+  document.getElementById('pm-main-img').src=imgs[i];
+  document.querySelectorAll('#pm-thumbs img').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+}
+function pmSetSize(i){
+  pmState.sizeIdx=i;
+  document.querySelectorAll('.size-opt').forEach(s=>s.classList.toggle('selected', parseInt(s.dataset.i)===i));
+}
+function pmQty(d){
+  pmState.qty=Math.max(1,pmState.qty+d);
+  document.getElementById('pm-qty').textContent=pmState.qty;
+}
+function closePModal(){ document.getElementById('pmodal').classList.remove('open'); }
+function confirmAddCake(){
+  const c=getCakes().find(x=>x.id===pmState.cakeId);
+  if(!c) return;
+  const size=c.sizes[pmState.sizeIdx];
+  const cart=getCart();
+  const existing=cart.find(x=>x.type==='cake'&&x.refId===c.id&&x.sizeLabel===size.label);
+  if(existing){ existing.qty+=pmState.qty; } else {
+    cart.push({cartId:Date.now()+Math.random(),type:'cake',refId:c.id,name:c.name,category:c.category,sizeLabel:size.label,unitPrice:size.price,qty:pmState.qty});
+  }
+  setCart(cart);
+  updateCartBadges();
+  closePModal();
+  showToast(c.name+' added to cart!');
+}
+
+// ─── CART BADGE ───────────────────────────────
+function updateCartBadges(){
+  const count=getCart().reduce((s,i)=>s+i.qty,0);
+  document.querySelectorAll('[id^="cart-badge-"]').forEach(b=>{
+    if(count>0){ b.style.display='flex'; b.textContent=count; } else { b.style.display='none'; }
+  });
+}
+
+// ─── CART / CHECKOUT RENDER ───────────────────
+function cartTotals(){
+  const cart=getCart();
+  const subtotal=cart.reduce((s,i)=>s+i.unitPrice*i.qty,0);
+  const advance=Math.round(subtotal*0.5);
+  const balance=subtotal-advance;
+  return {subtotal,advance,balance};
+}
+function renderCart(){
+  const list=document.getElementById('cart-list');
+  if(!list) return;
+  const cart=getCart();
+  list.innerHTML = cart.length===0
+    ? '<p class="empty-note">Your cart is empty. Browse our cakes or party things to get started!</p>'
+    : cart.map(i=>`
+    <div class="cart-line">
+      <div class="info">
+        <h4>${i.name}${i.sizeLabel?' — '+i.sizeLabel:''}</h4>
+        <span>Qty ${i.qty} × LKR ${i.unitPrice.toLocaleString()}</span>
+      </div>
+      <div class="price">LKR ${(i.unitPrice*i.qty).toLocaleString()}</div>
+      <button class="remove" onclick="removeCartItem('${i.cartId}')">✕</button>
+    </div>`).join('');
+
+  const {subtotal,advance,balance}=cartTotals();
+  const summary=document.getElementById('cart-summary');
+  const checkout=document.getElementById('checkout-box');
+  const payment=document.getElementById('payment-box');
+  if(cart.length>0){
+    summary.style.display='block'; checkout.style.display='block'; payment.style.display='block';
+    document.getElementById('sum-subtotal').textContent='LKR '+subtotal.toLocaleString();
+    document.getElementById('sum-total').textContent='LKR '+subtotal.toLocaleString();
+    document.getElementById('sum-advance').textContent='LKR '+advance.toLocaleString();
+    document.getElementById('sum-balance').textContent='LKR '+balance.toLocaleString();
+  } else {
+    summary.style.display='none'; checkout.style.display='none'; payment.style.display='none';
+  }
+}
+function removeCartItem(cartId){
+  setCart(getCart().filter(i=>String(i.cartId)!==String(cartId)));
+  updateCartBadges();
+  renderCart();
+}
+
+// ─── REVIEWS ──────────────────────────────────
+function renderReviews(){
+  const el=document.getElementById('reviews-list');
+  if(!el) return;
+  const reviews=getReviews();
+  el.innerHTML=reviews.map(r=>`
+    <div class="review-item">
+      <div class="review-stars">${'★'.repeat(r.stars)}${'☆'.repeat(5-r.stars)}</div>
+      <div class="review-author">${r.author}</div>
+      <div class="review-text">"${r.text}"</div>
+      ${r.reply?`<div class="review-reply-box">📝 RETRO: ${r.reply}</div>`:''}
+    </div>`).join('') || '<p style="color:var(--muted);font-size:13px">No reviews yet.</p>';
+}
+
+// ─── STAR RATING ─────────────────────────────
+let selectedStars=0;
+document.querySelectorAll('.star').forEach(s=>{
+  s.addEventListener('click',()=>{
+    selectedStars=parseInt(s.dataset.v);
+    document.querySelectorAll('.star').forEach(x=>x.classList.toggle('active',parseInt(x.dataset.v)<=selectedStars));
+    document.getElementById('review-field').style.display=selectedStars>0?'block':'none';
+  });
+});
+
+// ─── CARD INPUT FORMATTING ────────────────────
+document.getElementById('card-number').addEventListener('input',function(e){
+  let v=e.target.value.replace(/\D/g,'').slice(0,16);
+  e.target.value=v.replace(/(.{4})/g,'$1 ').trim();
+});
+document.getElementById('card-expiry').addEventListener('input',function(e){
+  let v=e.target.value.replace(/\D/g,'').slice(0,4);
+  if(v.length>2) v=v.slice(0,2)+'/'+v.slice(2);
+  e.target.value=v;
+});
+document.getElementById('card-cvv').addEventListener('input',function(e){
+  e.target.value=e.target.value.replace(/\D/g,'').slice(0,4);
+});
+
+// ─── SUBMIT ORDER ─────────────────────────────
+function nextOrderNo(){
+  const orders=getOrders();
+  let max=1000;
+  orders.forEach(o=>{ const m=(o.orderNo||'').match(/(\d+)$/); if(m) max=Math.max(max,parseInt(m[1],10)); });
+  return 'ORD-'+(max+1);
+}
+function submitOrder(){
+  const cart=getCart();
+  if(cart.length===0){ showToast('Your cart is empty.'); return; }
+  const name=document.getElementById('co-name').value.trim();
+  const phone=document.getElementById('co-phone').value.trim();
+  const note=document.getElementById('co-note').value.trim();
+  const cardName=document.getElementById('card-name').value.trim();
+  const cardNumber=document.getElementById('card-number').value.replace(/\s/g,'');
+  const cardExpiry=document.getElementById('card-expiry').value.trim();
+  const cardCvv=document.getElementById('card-cvv').value.trim();
+
+  if(!name||!phone){ showToast('Please fill in your name and phone number.'); return; }
+  if(!cardName||cardNumber.length<12||cardExpiry.length<5||cardCvv.length<3){ showToast('Please enter valid card details for the advance payment.'); return; }
+
+  const {subtotal,advance,balance}=cartTotals();
+  const orders=getOrders();
+  const newId=orders.length>0?Math.max(...orders.map(o=>o.id))+1:1;
+  const cakeSummary=cart.map(i=>i.name+(i.sizeLabel?' ('+i.sizeLabel+')':'')+' x'+i.qty).join(', ');
+
+  orders.push({
+    id:newId,
+    orderNo:nextOrderNo(),
+    name, phone, note,
+    cake:cakeSummary,
+    items:cart,
+    subtotal, advance, balance,
+    cardLast4: cardNumber.slice(-4),
+    paymentStatus:'Advance Paid (LKR '+advance.toLocaleString()+')',
+    status:'pending',
+    date:new Date().toISOString().slice(0,10),
+    reply:''
+  });
+  setData('retro_orders',orders);
+
+  if(selectedStars>0){
+    const reviewText=document.getElementById('co-review').value.trim();
+    if(reviewText){
+      const reviews=getReviews();
+      const rid=reviews.length>0?Math.max(...reviews.map(r=>r.id))+1:1;
+      reviews.push({id:rid,author:name||'Anonymous',stars:selectedStars,text:reviewText,reply:'',date:new Date().toISOString().slice(0,10)});
+      setData('retro_reviews',reviews);
+    }
+  }
+
+  setCart([]);
+  updateCartBadges();
+  showToast('✓ Advance of LKR '+advance.toLocaleString()+' received! Order confirmed — balance LKR '+balance.toLocaleString()+' due on pickup.');
+
+  ['co-name','co-phone','co-note','card-name','card-number','card-expiry','card-cvv'].forEach(id=>{document.getElementById(id).value='';});
+  document.getElementById('co-review').value='';
+  selectedStars=0;
+  document.querySelectorAll('.star').forEach(s=>s.classList.remove('active'));
+  document.getElementById('review-field').style.display='none';
+
+  renderCart();
+  setTimeout(()=>goTo(0),1200);
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.style.display='block';
+  clearTimeout(window._tt);
+  window._tt=setTimeout(()=>{t.style.display='none';},3800);
+}
+
+// Init
+refreshCurrent();
+
+// Refresh data when returning to tab (in case admin made changes)
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ refreshCurrent(); } });
+</script>
+</body>
+</html>

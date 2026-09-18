@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Retro The Cake Lab — Admin Panel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #9C6644;
+  --gold-light: #B08968;
+  --dark: #7F5539;
+  --paper: #EDE0D4;
+  --surface: #FFFFFF;
+  --panel: #E6CCB2;
+  --border: rgba(156,102,68,0.28);
+  --muted: rgba(127,85,57,0.6);
+  --red: #e05555;
+  --green: #4caf7d;
+  --blue: #5b9bd5;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--dark);min-height:100vh;display:flex;}
+
+/* ── LOGIN ── */
+#login-screen{
+  position:fixed;inset:0;background:var(--paper);
+  display:flex;align-items:center;justify-content:center;z-index:999;
+}
+.login-box{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:20px;padding:48px 40px;width:360px;text-align:center;
+}
+.login-box h1{font-family:'Playfair Display',serif;font-size:28px;color:var(--gold);letter-spacing:6px;margin-bottom:6px;}
+.login-box p{color:var(--muted);font-size:12px;letter-spacing:1.5px;margin-bottom:32px;}
+.login-box input{
+  width:100%;padding:12px 14px;background:var(--paper);
+  border:1px solid var(--border);border-radius:8px;color:var(--dark);
+  font-family:'DM Sans',sans-serif;font-size:14px;outline:none;margin-bottom:12px;
+}
+.login-box input:focus{border-color:var(--gold);}
+.login-box input::placeholder{color:var(--muted);}
+.login-btn{
+  width:100%;padding:13px;background:linear-gradient(135deg,var(--gold),var(--gold-light));
+  color:var(--surface);border:none;border-radius:8px;font-weight:600;
+  font-size:14px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;
+  font-family:'DM Sans',sans-serif;transition:opacity 0.2s;
+}
+.login-btn:hover{opacity:0.85;}
+.login-error{color:var(--red);font-size:12px;margin-top:10px;display:none;}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  width:220px;min-height:100vh;background:var(--panel);
+  border-right:1px solid var(--border);display:flex;flex-direction:column;
+  position:fixed;left:0;top:0;bottom:0;z-index:100;
+}
+.sidebar-logo{
+  padding:28px 24px 20px;border-bottom:1px solid var(--border);
+  font-family:'Playfair Display',serif;font-size:22px;letter-spacing:6px;color:var(--gold);
+}
+.sidebar-logo span{display:block;font-size:10px;letter-spacing:2px;color:var(--muted);font-family:'DM Sans',sans-serif;margin-top:2px;}
+.sidebar nav{flex:1;padding:16px 0;}
+.nav-item{
+  display:flex;align-items:center;gap:12px;padding:12px 24px;
+  cursor:pointer;color:var(--muted);font-size:13px;letter-spacing:0.5px;
+  transition:all 0.2s;border-left:3px solid transparent;
+}
+.nav-item:hover{color:var(--dark);background:rgba(156,102,68,0.08);}
+.nav-item.active{color:var(--gold);border-left-color:var(--gold);background:rgba(156,102,68,0.12);}
+.nav-item .icon{font-size:16px;width:20px;text-align:center;}
+.sidebar-footer{padding:20px 24px;border-top:1px solid var(--border);}
+.logout-btn{
+  width:100%;padding:9px;background:transparent;border:1px solid var(--border);
+  border-radius:6px;color:var(--muted);cursor:pointer;font-size:12px;
+  font-family:'DM Sans',sans-serif;transition:all 0.2s;letter-spacing:1px;
+}
+.logout-btn:hover{border-color:var(--red);color:var(--red);}
+
+/* ── MAIN ── */
+.main{margin-left:220px;flex:1;padding:32px 36px;min-height:100vh;}
+.page-title{
+  font-family:'Playfair Display',serif;font-size:28px;color:var(--gold);
+  margin-bottom:4px;
+}
+.page-sub{color:var(--muted);font-size:13px;margin-bottom:28px;letter-spacing:0.5px;}
+
+/* ── SECTION ── */
+.section{display:none;}
+.section.active{display:block;}
+
+/* ── STAT CARDS ── */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:30px;}
+.stat-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:14px;
+  padding:20px;text-align:center;
+}
+.stat-card .num{font-family:'Playfair Display',serif;font-size:32px;color:var(--gold);}
+.stat-card .lbl{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-top:4px;}
+
+/* ── BILLING ── */
+.billing-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:16px;margin-bottom:24px;}
+.billing-summary .stat-card{border-color:rgba(156,102,68,0.4);}
+.billing-groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;margin-top:24px;}
+.billing-groups h4{font-family:'Playfair Display',serif;font-size:15px;color:var(--gold);margin-bottom:10px;letter-spacing:1px;}
+.mini-table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.mini-table th{background:rgba(156,102,68,0.08);padding:9px 12px;text-align:left;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);font-weight:500;}
+.mini-table td{padding:9px 12px;font-size:12px;border-top:1px solid var(--border);}
+
+/* ── TABLES ── */
+.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+table{width:100%;border-collapse:collapse;}
+th{background:rgba(156,102,68,0.08);padding:12px 16px;text-align:left;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);font-weight:500;}
+td{padding:13px 16px;font-size:13px;border-top:1px solid var(--border);vertical-align:middle;}
+tr:hover td{background:rgba(156,102,68,0.05);}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500;letter-spacing:0.5px;}
+.badge.pending{background:rgba(156,102,68,0.15);color:var(--gold);}
+.badge.confirmed{background:rgba(76,175,125,0.15);color:var(--green);}
+.badge.rejected{background:rgba(224,85,85,0.15);color:var(--red);}
+.badge.new{background:rgba(91,155,213,0.15);color:var(--blue);}
+.badge.replied{background:rgba(76,175,125,0.15);color:var(--green);}
+
+/* ── BUTTONS ── */
+.btn{padding:7px 14px;border-radius:6px;border:none;cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif;font-weight:500;transition:all 0.2s;letter-spacing:0.5px;}
+.btn-gold{background:var(--gold);color:var(--surface);}
+.btn-gold:hover{opacity:0.85;}
+.btn-green{background:rgba(76,175,125,0.2);color:var(--green);border:1px solid rgba(76,175,125,0.3);}
+.btn-green:hover{background:var(--green);color:white;}
+.btn-red{background:rgba(224,85,85,0.15);color:var(--red);border:1px solid rgba(224,85,85,0.25);}
+.btn-red:hover{background:var(--red);color:white;}
+.btn-blue{background:rgba(91,155,213,0.15);color:var(--blue);border:1px solid rgba(91,155,213,0.25);}
+.btn-blue:hover{background:var(--blue);color:white;}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border);}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold);}
+
+/* ── MODAL ── */
+.modal-bg{
+  display:none;position:fixed;inset:0;background:rgba(60,40,25,0.55);
+  z-index:500;align-items:center;justify-content:center;
+}
+.modal-bg.open{display:flex;}
+.modal{
+  background:var(--surface);border:1px solid var(--border);border-radius:18px;
+  padding:32px;width:90%;max-width:480px;max-height:90vh;overflow-y:auto;
+}
+.modal h3{font-family:'Playfair Display',serif;font-size:22px;color:var(--gold);margin-bottom:16px;}
+.modal-close{float:right;background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;margin-top:-4px;}
+.modal-close:hover{color:var(--red);}
+.form-group{margin-bottom:14px;}
+.form-group label{display:block;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:5px;}
+.form-group input,.form-group textarea,.form-group select{
+  width:100%;padding:10px 13px;background:var(--paper);
+  border:1px solid var(--border);border-radius:7px;color:var(--dark);
+  font-family:'DM Sans',sans-serif;font-size:13px;outline:none;
+}
+.form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:var(--gold);}
+.form-group textarea{resize:vertical;min-height:90px;}
+.form-group input::placeholder,.form-group textarea::placeholder{color:var(--muted);}
+.form-group select option{background:var(--paper);color:var(--dark);}
+.modal-actions{display:flex;gap:10px;margin-top:20px;justify-content:flex-end;}
+
+/* ── CAKE MANAGER ── */
+.cake-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px;margin-bottom:24px;}
+.cake-admin-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;
+}
+.cake-admin-card img{width:100%;height:140px;object-fit:cover;display:block;}
+.cake-admin-info{padding:12px;}
+.cake-admin-info h4{font-family:'Playfair Display',serif;font-size:15px;margin-bottom:4px;}
+.cake-admin-info .price-edit{display:flex;align-items:center;gap:8px;margin:8px 0;}
+.price-input{width:110px;padding:6px 10px;background:var(--paper);border:1px solid var(--border);border-radius:6px;color:var(--gold);font-size:13px;font-weight:600;outline:none;}
+.price-input:focus{border-color:var(--gold);}
+.cake-admin-actions{display:flex;gap:6px;margin-top:8px;}
+
+/* ── ADS ── */
+.ads-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px;margin-bottom:24px;}
+.ad-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;
+}
+.ad-card img{width:100%;height:120px;object-fit:cover;display:block;}
+.ad-card-info{padding:12px;}
+.ad-card-info h4{font-size:14px;font-weight:600;margin-bottom:4px;}
+.ad-card-info p{font-size:12px;color:var(--muted);margin-bottom:10px;}
+.ad-card-info .ad-actions{display:flex;gap:6px;}
+.add-btn{
+  display:flex;align-items:center;gap:8px;padding:12px 20px;
+  background:rgba(156,102,68,0.1);border:1px dashed rgba(156,102,68,0.45);
+  border-radius:10px;color:var(--gold);cursor:pointer;font-size:13px;
+  font-family:'DM Sans',sans-serif;transition:all 0.2s;margin-bottom:24px;
+  width:fit-content;
+}
+.add-btn:hover{background:rgba(156,102,68,0.2);}
+
+/* ── REVIEWS ── */
+.review-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  padding:18px;margin-bottom:14px;
+}
+.review-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
+.review-author{font-weight:600;font-size:14px;}
+.review-stars{color:var(--gold);font-size:14px;letter-spacing:2px;}
+.review-text{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:12px;}
+.review-reply{
+  background:var(--paper);border-left:3px solid var(--gold);
+  padding:10px 14px;border-radius:0 8px 8px 0;font-size:12px;
+  color:var(--dark);margin-bottom:10px;display:none;
+}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;bottom:28px;right:28px;background:var(--gold);color:var(--surface);
+  padding:12px 22px;border-radius:10px;font-weight:600;font-size:13px;
+  box-shadow:0 8px 24px rgba(60,40,25,0.3);z-index:9999;display:none;
+  animation:fadeUp 0.35s ease;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:rgba(156,102,68,0.3);border-radius:3px;}
+</style>
+</head>
+<body>
+
+<!-- ════════════ LOGIN ════════════ -->
+<div id="login-screen">
+  <div class="login-box">
+    <h1>RETRO</h1>
+    <p>ADMIN PANEL · SECURE ACCESS</p>
+    <input type="text" id="login-user" placeholder="Username">
+    <input type="password" id="login-pass" placeholder="Password">
+    <button class="login-btn" onclick="doLogin()">Enter Dashboard</button>
+    <div class="login-error" id="login-error">⚠ Invalid credentials</div>
+    <div style="margin-top:16px;font-size:11px;color:var(--muted);">Default: admin / retro2025</div>
+  </div>
+</div>
+
+<!-- ════════════ SIDEBAR ════════════ -->
+<div class="sidebar">
+  <div class="sidebar-logo">RETRO<span>Admin Dashboard</span></div>
+  <nav>
+    <div class="nav-item active" onclick="showSection('dashboard')"><span class="icon">📊</span> Dashboard</div>
+    <div class="nav-item" onclick="showSection('orders')"><span class="icon">📦</span> Orders</div>
+    <div class="nav-item" onclick="showSection('billing')"><span class="icon">💰</span> Billing</div>
+    <div class="nav-item" onclick="showSection('reviews')"><span class="icon">⭐</span> Reviews</div>
+    <div class="nav-item" onclick="showSection('cakes')"><span class="icon">🍰</span> Manage Cakes</div>
+    <div class="nav-item" onclick="showSection('party')"><span class="icon">🎈</span> Party Things</div>
+    <div class="nav-item" onclick="showSection('ads')"><span class="icon">📢</span> Advertisements</div>
+    <div class="nav-item" onclick="showSection('settings')"><span class="icon">⚙️</span> Settings</div>
+  </nav>
+  <div class="sidebar-footer">
+    <button class="logout-btn" onclick="doLogout()">⎋ Logout</button>
+  </div>
+</div>
+
+<!-- ════════════ MAIN ════════════ -->
+<div class="main">
+
+  <!-- DASHBOARD -->
+  <div class="section active" id="sec-dashboard">
+    <div class="page-title">Dashboard</div>
+    <div class="page-sub">Welcome back, Admin · Retro The Cake Lab</div>
+    <div class="stats" id="stats-row"></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Customer</th><th>Cake</th><th>Phone</th><th>Status</th><th>Date</th></tr></thead>
+        <tbody id="dashboard-orders"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ORDERS -->
+  <div class="section" id="sec-orders">
+    <div class="page-title">Orders</div>
+    <div class="page-sub">View, confirm or reject customer orders · Reply to customers</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Customer</th><th>Phone</th><th>Cake</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody id="orders-table"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- BILLING -->
+  <div class="section" id="sec-billing">
+    <div class="page-title">Billing</div>
+    <div class="page-sub">Retro The Cake Lab · Auto-dated invoices with daily, monthly &amp; yearly totals</div>
+    <div class="billing-summary" id="billing-summary"></div>
+    <button class="add-btn" onclick="openAddBill()">＋ New Bill</button>
+    <div class="table-wrap" style="margin-bottom:24px;">
+      <table>
+        <thead><tr>
+          <th>Order #</th><th>Date</th><th>Time</th><th>Cake</th><th>Contact</th>
+          <th>Additional</th><th>Details</th><th>Price</th><th>Discount</th><th>Total</th><th></th>
+        </tr></thead>
+        <tbody id="billing-table"></tbody>
+      </table>
+    </div>
+    <div class="billing-groups">
+      <div>
+        <h4>Daily Totals</h4>
+        <table class="mini-table"><thead><tr><th>Date</th><th>Total (LKR)</th></tr></thead><tbody id="billing-daily"></tbody></table>
+      </div>
+      <div>
+        <h4>Monthly Totals</h4>
+        <table class="mini-table"><thead><tr><th>Month</th><th>Total (LKR)</th></tr></thead><tbody id="billing-monthly"></tbody></table>
+      </div>
+      <div>
+        <h4>Yearly Totals</h4>
+        <table class="mini-table"><thead><tr><th>Year</th><th>Total (LKR)</th></tr></thead><tbody id="billing-yearly"></tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- REVIEWS -->
+  <div class="section" id="sec-reviews">
+    <div class="page-title">Customer Reviews</div>
+    <div class="page-sub">Read and reply to customer feedback</div>
+    <div id="reviews-list"></div>
+  </div>
+
+  <!-- CAKES -->
+  <div class="section" id="sec-cakes">
+    <div class="page-title">Manage Cakes</div>
+    <div class="page-sub">Set category, upload multiple photos, and price each size — changes appear instantly on the customer page</div>
+    <button class="add-btn" onclick="openAddCake()">＋ Add New Cake</button>
+    <div class="cake-grid" id="cake-grid"></div>
+  </div>
+
+  <!-- PARTY THINGS -->
+  <div class="section" id="sec-party">
+    <div class="page-title">Party Things</div>
+    <div class="page-sub">Balloons, candles, sprayers &amp; more — shown as add-ons on the customer page</div>
+    <button class="add-btn" onclick="openAddParty()">＋ Add Party Item</button>
+    <div class="cake-grid" id="party-grid"></div>
+  </div>
+
+  <!-- ADS -->
+  <div class="section" id="sec-ads">
+    <div class="page-title">Advertisements</div>
+    <div class="page-sub">Manage new arrivals and promotional banners shown to customers</div>
+    <button class="add-btn" onclick="openAddAd()">＋ New Advertisement</button>
+    <div class="ads-grid" id="ads-grid"></div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="section" id="sec-settings">
+    <div class="page-title">Settings</div>
+    <div class="page-sub">Change the username and password used to log in to this admin panel</div>
+    <div class="table-wrap" style="padding:28px;max-width:420px;">
+      <div class="form-group">
+        <label>Current Password</label>
+        <input type="password" id="set-current-pass" placeholder="Enter your current password">
+      </div>
+      <div class="form-group">
+        <label>New Username</label>
+        <input type="text" id="set-new-user" placeholder="Leave blank to keep current username">
+      </div>
+      <div class="form-group">
+        <label>New Password</label>
+        <input type="password" id="set-new-pass" placeholder="Leave blank to keep current password">
+      </div>
+      <div class="form-group">
+        <label>Confirm New Password</label>
+        <input type="password" id="set-new-pass-confirm" placeholder="Re-enter new password">
+      </div>
+      <button class="btn btn-gold" onclick="saveSettings()">Save Changes</button>
+      <div style="font-size:11px;color:var(--muted);margin-top:14px;">You'll need to log in again with your new details after saving.</div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- ════════════ MODALS ════════════ -->
+
+<!-- Reply Modal -->
+<div class="modal-bg" id="modal-reply">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-reply')">✕</button>
+    <h3>Reply to Customer</h3>
+    <div id="reply-order-info" style="background:rgba(156,102,68,0.08);border-radius:8px;padding:14px;margin-bottom:16px;font-size:13px;line-height:1.7;"></div>
+    <div class="form-group">
+      <label>Your Reply Message</label>
+      <textarea id="reply-text" placeholder="Type your reply here..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-reply')">Cancel</button>
+      <button class="btn btn-gold" onclick="sendReply()">Send Reply</button>
+    </div>
+  </div>
+</div>
+
+<!-- Review Reply Modal -->
+<div class="modal-bg" id="modal-review-reply">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-review-reply')">✕</button>
+    <h3>Reply to Review</h3>
+    <div id="review-preview" style="background:rgba(156,102,68,0.08);border-radius:8px;padding:14px;margin-bottom:16px;font-size:13px;line-height:1.7;"></div>
+    <div class="form-group">
+      <label>Admin Reply</label>
+      <textarea id="review-reply-text" placeholder="Write a public reply..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-review-reply')">Cancel</button>
+      <button class="btn btn-gold" onclick="submitReviewReply()">Post Reply</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Cake Modal -->
+<div class="modal-bg" id="modal-cake">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-cake')">✕</button>
+    <h3 id="cake-modal-title">Add New Cake</h3>
+    <input type="hidden" id="cake-edit-id">
+    <div class="form-group">
+      <label>Cake Name</label>
+      <input type="text" id="cake-name" placeholder="e.g. Mango Delight">
+    </div>
+    <div class="form-group">
+      <label>Category</label>
+      <select id="cake-category">
+        <option value="Birthday">Birthday</option>
+        <option value="Anniversary">Anniversary</option>
+        <option value="Wedding">Wedding</option>
+        <option value="Cookies">Cookies</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Description</label>
+      <textarea id="cake-desc" placeholder="Short description of this cake..."></textarea>
+    </div>
+    <div class="form-group">
+      <label>Photos (customers can browse all of these)</label>
+      <div id="cake-gallery-list" style="margin-bottom:8px;"></div>
+      <div style="display:flex;gap:8px;margin-bottom:8px;">
+        <input type="text" id="cake-img-url" placeholder="Paste an image URL...">
+        <button class="btn btn-ghost" onclick="addCakeImageUrl()" style="white-space:nowrap;">＋ Add URL</button>
+      </div>
+      <input type="file" id="cake-img-file" accept="image/*" multiple onchange="previewCakeImg(event)">
+    </div>
+    <div class="form-group">
+      <label>Sizes &amp; Prices</label>
+      <div id="cake-sizes-list"></div>
+      <button class="btn btn-ghost" onclick="addCakeSize()">＋ Add Size</button>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-cake')">Cancel</button>
+      <button class="btn btn-gold" onclick="saveCake()">Save Cake</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Party Item Modal -->
+<div class="modal-bg" id="modal-party">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-party')">✕</button>
+    <h3 id="party-modal-title">Add Party Item</h3>
+    <input type="hidden" id="party-edit-id">
+    <div class="form-group">
+      <label>Item Name</label>
+      <input type="text" id="party-name" placeholder="e.g. Balloons (Set of 10)">
+    </div>
+    <div class="form-group">
+      <label>Price (LKR)</label>
+      <input type="number" id="party-price" placeholder="e.g. 500">
+    </div>
+    <div class="form-group">
+      <label>Description</label>
+      <textarea id="party-desc" placeholder="Short description..."></textarea>
+    </div>
+    <div class="form-group">
+      <label>Image URL</label>
+      <input type="text" id="party-img" placeholder="https://... or leave blank">
+    </div>
+    <div class="form-group">
+      <label>Or Upload Image</label>
+      <input type="file" id="party-img-file" accept="image/*" onchange="previewPartyImg(event)">
+    </div>
+    <img id="party-img-preview" src="" style="width:100%;height:120px;object-fit:cover;border-radius:8px;margin-top:6px;display:none;">
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-party')">Cancel</button>
+      <button class="btn btn-gold" onclick="saveParty()">Save Item</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Ad Modal -->
+<div class="modal-bg" id="modal-ad">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-ad')">✕</button>
+    <h3 id="ad-modal-title">New Advertisement</h3>
+    <input type="hidden" id="ad-edit-id">
+    <div class="form-group">
+      <label>Title</label>
+      <input type="text" id="ad-title" placeholder="e.g. New Arrival: Mango Tart!">
+    </div>
+    <div class="form-group">
+      <label>Description</label>
+      <textarea id="ad-desc" placeholder="Promotional text..."></textarea>
+    </div>
+    <div class="form-group">
+      <label>Image URL</label>
+      <input type="text" id="ad-img" placeholder="https://...">
+    </div>
+    <div class="form-group">
+      <label>Or Upload Image</label>
+      <input type="file" id="ad-img-file" accept="image/*" onchange="previewAdImg(event)">
+    </div>
+    <img id="ad-img-preview" src="" style="width:100%;height:110px;object-fit:cover;border-radius:8px;margin-top:6px;display:none;">
+    <div class="form-group">
+      <label>Tag</label>
+      <select id="ad-tag">
+        <option value="New Arrival">🆕 New Arrival</option>
+        <option value="Special Offer">🎉 Special Offer</option>
+        <option value="Limited Edition">✨ Limited Edition</option>
+        <option value="Seasonal">🌸 Seasonal</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-ad')">Cancel</button>
+      <button class="btn btn-gold" onclick="saveAd()">Publish Ad</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Bill Modal -->
+<div class="modal-bg" id="modal-bill">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-bill')">✕</button>
+    <h3>New Bill</h3>
+    <div class="form-group">
+      <label>Order Number</label>
+      <input type="text" id="bill-order-no" placeholder="Auto-generated">
+    </div>
+    <div class="form-group">
+      <label>Cake Name</label>
+      <input type="text" id="bill-cake" placeholder="e.g. Red Velvet Cake">
+    </div>
+    <div class="form-group">
+      <label>Customer Contact Number</label>
+      <input type="text" id="bill-contact" placeholder="e.g. 077-111-2222">
+    </div>
+    <div class="form-group">
+      <label>Any Additional Things</label>
+      <input type="text" id="bill-additional" placeholder="e.g. Candles, box, topper...">
+    </div>
+    <div class="form-group">
+      <label>More Details</label>
+      <textarea id="bill-details" placeholder="Any extra notes about this order..."></textarea>
+    </div>
+    <div class="form-group">
+      <label>Price (LKR)</label>
+      <input type="number" id="bill-price" placeholder="e.g. 3200" oninput="updateBillTotalPreview()">
+    </div>
+    <div class="form-group">
+      <label>Discount (LKR)</label>
+      <input type="number" id="bill-discount" placeholder="e.g. 200" value="0" oninput="updateBillTotalPreview()">
+    </div>
+    <div class="form-group">
+      <label>Total Price</label>
+      <div id="bill-total-preview" style="font-family:'Playfair Display',serif;font-size:22px;color:var(--gold);">LKR 0</div>
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Date &amp; time are stamped automatically when you save.</div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-bill')">Cancel</button>
+      <button class="btn btn-gold" onclick="saveBill()">Save Bill</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── AUTH ───────────────────────────────────
+function getCreds(){ return getData('retro_admin_creds', {user:'admin', pass:'retro2025'}); }
+function setCreds(c){ setData('retro_admin_creds', c); }
+
+function doLogin(){
+  const u = document.getElementById('login-user').value.trim();
+  const p = document.getElementById('login-pass').value.trim();
+  const creds = getCreds();
+  if(u===creds.user && p===creds.pass){
+    document.getElementById('login-error').style.display='none';
+    document.getElementById('login-screen').style.display='none';
+    loadAll();
+  } else {
+    document.getElementById('login-error').style.display='block';
+  }
+}
+document.getElementById('login-pass').addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin(); });
+
+function doLogout(){
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('login-user').value='';
+  document.getElementById('login-pass').value='';
+}
+
+// ─── DATA ───────────────────────────────────
+function getData(key, def){ try{ return JSON.parse(localStorage.getItem(key))||def; }catch(e){ return def; } }
+function setData(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
+
+function defaultCakes(){
+  return [
+    {id:1,name:'Bunny Cake',category:'Birthday',desc:'Soft vanilla sponge with a sweet bunny topper.',images:['https://images.unsplash.com/photo-1541783245831-57d6fb0926d3?w=600&q=80'],sizes:[{label:'Small 5"',weight:'750g',price:3200},{label:'Medium 6"',weight:'700g-1kg',price:4500},{label:'Regular 6"',weight:'1kg-1.5kg',price:5800},{label:'Large 6"8',weight:'1.5kg-1.75kg',price:6800}]},
+    {id:2,name:'Minion Cake',category:'Birthday',desc:'Fun minion-themed cake, a party favourite.',images:['https://images.unsplash.com/photo-1542826438-bd32f43d626f?w=600&q=80'],sizes:[{label:'Small 5"',weight:'750g',price:3200},{label:'Medium 6"',weight:'700g-1kg',price:4500},{label:'Regular 6"',weight:'1kg-1.5kg',price:5800},{label:'Large 6"8',weight:'1.5kg-1.75kg',price:6800}]},
+    {id:3,name:'Butterfly Cake',category:'Birthday',desc:'Elegant butterflies on a soft buttercream base.',images:['https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=600&q=80'],sizes:[{label:'Small 5"',weight:'750g',price:3200},{label:'Medium 6"',weight:'700g-1kg',price:4500},{label:'Regular 6"',weight:'1kg-1.5kg',price:5800},{label:'Large 6"8',weight:'1.5kg-1.75kg',price:6800}]},
+    {id:4,name:'Princess Cake',category:'Birthday',desc:'A regal cake fit for a little princess.',images:['https://images.unsplash.com/photo-1607478900766-efe13248b125?w=600&q=80'],sizes:[{label:'Small 5"',weight:'750g',price:3200},{label:'Medium 6"',weight:'700g-1kg',price:4500},{label:'Regular 6"',weight:'1kg-1.5kg',price:5800},{label:'Large 6"8',weight:'1.5kg-1.75kg',price:6800}]},
+    {id:5,name:'Golden Anniversary Cake',category:'Anniversary',desc:'Rich chocolate cake with gold leaf accents.',images:['https://images.unsplash.com/photo-1606890737304-57a1ca8a5b62?w=600&q=80'],sizes:[{label:'Small 5"',weight:'750g',price:3800},{label:'Medium 6"',weight:'700g-1kg',price:5200},{label:'Regular 6"',weight:'1kg-1.5kg',price:6600},{label:'Large 6"8',weight:'1.5kg-1.75kg',price:7600}]},
+    {id:6,name:'Rose Anniversary Cake',category:'Anniversary',desc:'Delicate buttercream roses over vanilla sponge.',images:['https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&q=80'],sizes:[{label:'Small 5"',weight:'750g',price:3800},{label:'Medium 6"',weight:'700g-1kg',price:5200},{label:'Regular 6"',weight:'1kg-1.5kg',price:6600},{label:'Large 6"8',weight:'1.5kg-1.75kg',price:7600}]},
+    {id:7,name:'Classic Tiered Wedding Cake',category:'Wedding',desc:'Three-tier white wedding cake, timeless and elegant.',images:['https://images.unsplash.com/photo-1607478900766-efe13248b125?w=600&q=80'],sizes:[{label:'Small (2-tier)',weight:'2kg',price:12000},{label:'Medium (3-tier)',weight:'3.5kg',price:18500},{label:'Large (4-tier)',weight:'5kg',price:26000}]},
+    {id:8,name:'Ivory Rose Wedding Cake',category:'Wedding',desc:'Ivory fondant with hand-piped sugar roses.',images:['https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=600&q=80'],sizes:[{label:'Small (2-tier)',weight:'2kg',price:13500},{label:'Medium (3-tier)',weight:'3.5kg',price:19800},{label:'Large (4-tier)',weight:'5kg',price:27500}]},
+    {id:9,name:'Choc Chip Cookies',category:'Cookies',desc:'Classic chewy chocolate chip cookies, baked fresh.',images:['https://images.unsplash.com/photo-1499636136210-6f4ee915583e?w=600&q=80'],sizes:[{label:'Box of 6',weight:'',price:800},{label:'Box of 12',weight:'',price:1500}]},
+    {id:10,name:'Butter Cookies',category:'Cookies',desc:'Buttery, crumbly, melt-in-your-mouth cookies.',images:['https://images.unsplash.com/photo-1499636136210-6f4ee915583e?w=600&q=80'],sizes:[{label:'Box of 6',weight:'',price:750},{label:'Box of 12',weight:'',price:1400}]},
+  ];
+}
+
+function defaultParty(){
+  return [
+    {id:1,name:'Balloons (Set of 10)',desc:'Assorted colour party balloons.',img:'',price:500},
+    {id:2,name:'Birthday Candles',desc:'Pack of standard birthday candles.',img:'',price:150},
+    {id:3,name:'Number Candles',desc:'Choose any single-digit number candle.',img:'',price:250},
+    {id:4,name:'Party Sprayers',desc:'Confetti string sprayers, pack of 2.',img:'',price:400},
+    {id:5,name:'Popup Decorations',desc:'Pop-up "Happy Birthday" banner set.',img:'',price:600},
+    {id:6,name:'Smoke Flares',desc:'Coloured smoke flares for photos, pair.',img:'',price:900},
+  ];
+}
+
+function defaultReviews(){
+  return [];
+}
+
+function defaultOrders(){
+  return [];
+}
+
+function getCakes(){ const d=getData('retro_cakes',null); return d||defaultCakes(); }
+function getOrders(){ return getData('retro_orders', defaultOrders()); }
+function getReviews(){ return getData('retro_reviews', defaultReviews()); }
+function getAds(){ return getData('retro_ads', []); }
+function getBills(){ return getData('retro_bills', []); }
+function getParty(){ const d=getData('retro_party',null); return d||defaultParty(); }
+function minPrice(c){ return c.sizes&&c.sizes.length?Math.min(...c.sizes.map(s=>s.price)):0; }
+
+// ─── NAV ────────────────────────────────────
+function showSection(id){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  event.currentTarget.classList.add('active');
+  if(id==='dashboard') renderDashboard();
+  if(id==='orders') renderOrders();
+  if(id==='billing') renderBilling();
+  if(id==='reviews') renderReviews();
+  if(id==='cakes') renderCakes();
+  if(id==='party') renderPartyAdmin();
+  if(id==='ads') renderAds();
+  if(id==='settings') renderSettings();
+}
+
+function loadAll(){ renderDashboard(); }
+
+// ─── DASHBOARD ──────────────────────────────
+function renderDashboard(){
+  const orders=getOrders(), reviews=getReviews(), cakes=getCakes(), ads=getAds();
+  const pending=orders.filter(o=>o.status==='pending').length;
+  document.getElementById('stats-row').innerHTML=`
+    <div class="stat-card"><div class="num">${orders.length}</div><div class="lbl">Total Orders</div></div>
+    <div class="stat-card"><div class="num">${pending}</div><div class="lbl">Pending</div></div>
+    <div class="stat-card"><div class="num">${reviews.length}</div><div class="lbl">Reviews</div></div>
+    <div class="stat-card"><div class="num">${cakes.length}</div><div class="lbl">Cake Types</div></div>
+    <div class="stat-card"><div class="num">${ads.length}</div><div class="lbl">Active Ads</div></div>
+  `;
+  const tbody=document.getElementById('dashboard-orders');
+  tbody.innerHTML=orders.slice(0,8).map(o=>`
+    <tr>
+      <td>${o.name}</td>
+      <td>${o.cake.split('–')[0].trim()}</td>
+      <td>${o.phone}</td>
+      <td><span class="badge ${o.status}">${o.status}</span></td>
+      <td style="color:var(--muted)">${o.date}</td>
+    </tr>`).join('');
+}
+
+// ─── ORDERS ─────────────────────────────────
+let replyTargetId = null;
+
+function renderOrders(){
+  const orders=getOrders();
+  document.getElementById('orders-table').innerHTML = orders.length===0
+    ? '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:30px">No orders yet</td></tr>'
+    : orders.map(o=>`
+    <tr>
+      <td><strong>${o.name}</strong>${o.reply?'<br><span style="font-size:11px;color:var(--green)">✓ Replied</span>':''}${o.address?`<br><span style="font-size:11px;color:var(--muted)">${o.address}</span>`:''}</td>
+      <td>${o.phone}</td>
+      <td style="font-size:12px">${o.cake}${o.subtotal?`<br><span style="font-size:11px;color:var(--gold)">Total LKR ${o.subtotal.toLocaleString()} · Advance paid LKR ${(o.advance||0).toLocaleString()} · Balance LKR ${(o.balance||0).toLocaleString()}</span>`:''}</td>
+      <td style="color:var(--muted);font-size:12px">${o.date}</td>
+      <td><span class="badge ${o.status}">${o.status}</span></td>
+      <td style="display:flex;gap:6px;flex-wrap:wrap">
+        ${o.status==='pending'?`<button class="btn btn-green" onclick="updateOrderStatus(${o.id},'confirmed')">✓ Confirm</button><button class="btn btn-red" onclick="updateOrderStatus(${o.id},'rejected')">✕ Reject</button>`:''}
+        <button class="btn btn-blue" onclick="openReply(${o.id})">💬 Reply</button>
+      </td>
+    </tr>`).join('');
+}
+
+function updateOrderStatus(id, status){
+  const orders=getOrders();
+  const o=orders.find(x=>x.id===id);
+  if(o){ o.status=status; setData('retro_orders',orders); renderOrders(); renderDashboard(); showToast('Order '+status+'!'); }
+}
+
+function openReply(id){
+  const o=getOrders().find(x=>x.id===id);
+  replyTargetId=id;
+  document.getElementById('reply-order-info').innerHTML=`
+    <strong>${o.name}</strong> · ${o.phone}<br>
+    Cake: ${o.cake}<br>
+    Status: <span class="badge ${o.status}">${o.status}</span>
+    ${o.reply?'<br><br><em>Previous reply: '+o.reply+'</em>':''}
+  `;
+  document.getElementById('reply-text').value = o.reply||'';
+  openModal('modal-reply');
+}
+
+function sendReply(){
+  const text=document.getElementById('reply-text').value.trim();
+  if(!text){ showToast('Please write a reply.'); return; }
+  const orders=getOrders();
+  const o=orders.find(x=>x.id===replyTargetId);
+  if(o){ o.reply=text; setData('retro_orders',orders); }
+  closeModal('modal-reply');
+  renderOrders();
+  showToast('Reply saved!');
+}
+
+// ─── BILLING ────────────────────────────────
+function pad2(n){ return n<10?'0'+n:''+n; }
+function dateKeyOf(d){ return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate()); }
+function monthKeyOf(dateKey){ return dateKey.slice(0,7); }
+function yearKeyOf(dateKey){ return dateKey.slice(0,4); }
+function monthLabel(mk){
+  const [y,m]=mk.split('-');
+  const names=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return names[parseInt(m,10)-1]+' '+y;
+}
+
+function nextOrderNumber(){
+  const bills=getBills();
+  let max=1000;
+  bills.forEach(b=>{
+    const m=(b.orderNo||'').match(/(\d+)$/);
+    if(m) max=Math.max(max,parseInt(m[1],10));
+  });
+  return 'INV-'+(max+1);
+}
+
+function openAddBill(){
+  document.getElementById('bill-order-no').value=nextOrderNumber();
+  document.getElementById('bill-cake').value='';
+  document.getElementById('bill-contact').value='';
+  document.getElementById('bill-additional').value='';
+  document.getElementById('bill-details').value='';
+  document.getElementById('bill-price').value='';
+  document.getElementById('bill-discount').value='0';
+  updateBillTotalPreview();
+  openModal('modal-bill');
+}
+
+function updateBillTotalPreview(){
+  const price=parseFloat(document.getElementById('bill-price').value)||0;
+  const discount=parseFloat(document.getElementById('bill-discount').value)||0;
+  const total=Math.max(0,price-discount);
+  document.getElementById('bill-total-preview').textContent='LKR '+total.toLocaleString();
+}
+
+function saveBill(){
+  const orderNo=document.getElementById('bill-order-no').value.trim()||nextOrderNumber();
+  const cake=document.getElementById('bill-cake').value.trim();
+  const contact=document.getElementById('bill-contact').value.trim();
+  const additional=document.getElementById('bill-additional').value.trim();
+  const details=document.getElementById('bill-details').value.trim();
+  const price=parseFloat(document.getElementById('bill-price').value)||0;
+  const discount=parseFloat(document.getElementById('bill-discount').value)||0;
+  if(!cake||!contact||!price){ showToast('Cake, contact and price are required.'); return; }
+
+  const now=new Date();
+  const dateKey=dateKeyOf(now);
+  const bill={
+    id: Date.now(),
+    orderNo,
+    dateKey,
+    date: now.toLocaleDateString(),
+    time: now.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}),
+    cake, contact, additional, details,
+    price, discount,
+    total: Math.max(0, price-discount)
+  };
+  const bills=getBills();
+  bills.push(bill);
+  setData('retro_bills', bills);
+  closeModal('modal-bill');
+  renderBilling();
+  showToast('Bill saved — added to daily, monthly & yearly totals!');
+}
+
+function deleteBill(id){
+  if(!confirm('Delete this bill? This will also adjust the totals.')) return;
+  setData('retro_bills', getBills().filter(b=>b.id!==id));
+  renderBilling();
+  showToast('Bill deleted.');
+}
+
+function renderBilling(){
+  const bills=getBills().slice().sort((a,b)=>b.id-a.id);
+  const now=new Date();
+  const todayKey=dateKeyOf(now), monthKey=todayKey.slice(0,7), yearKey=todayKey.slice(0,4);
+
+  const sum=arr=>arr.reduce((s,b)=>s+b.total,0);
+  const todayTotal=sum(bills.filter(b=>b.dateKey===todayKey));
+  const monthTotal=sum(bills.filter(b=>b.dateKey.slice(0,7)===monthKey));
+  const yearTotal=sum(bills.filter(b=>b.dateKey.slice(0,4)===yearKey));
+  const allTimeTotal=sum(bills);
+
+  document.getElementById('billing-summary').innerHTML=`
+    <div class="stat-card"><div class="num">LKR ${todayTotal.toLocaleString()}</div><div class="lbl">Today's Total</div></div>
+    <div class="stat-card"><div class="num">LKR ${monthTotal.toLocaleString()}</div><div class="lbl">This Month</div></div>
+    <div class="stat-card"><div class="num">LKR ${yearTotal.toLocaleString()}</div><div class="lbl">This Year</div></div>
+    <div class="stat-card"><div class="num">LKR ${allTimeTotal.toLocaleString()}</div><div class="lbl">All-Time Total</div></div>
+    <div class="stat-card"><div class="num">${bills.length}</div><div class="lbl">Total Bills</div></div>
+  `;
+
+  document.getElementById('billing-table').innerHTML = bills.length===0
+    ? '<tr><td colspan="11" style="text-align:center;color:var(--muted);padding:30px">No bills yet. Click "New Bill" to create your first invoice.</td></tr>'
+    : bills.map(b=>`
+    <tr>
+      <td><strong>${b.orderNo}</strong></td>
+      <td style="color:var(--muted);font-size:12px">${b.date}</td>
+      <td style="color:var(--muted);font-size:12px">${b.time}</td>
+      <td>${b.cake}</td>
+      <td>${b.contact}</td>
+      <td style="font-size:12px">${b.additional||'—'}</td>
+      <td style="font-size:12px;max-width:160px">${b.details||'—'}</td>
+      <td>LKR ${b.price.toLocaleString()}</td>
+      <td style="color:var(--red)">${b.discount?'-LKR '+b.discount.toLocaleString():'—'}</td>
+      <td style="color:var(--gold);font-weight:600">LKR ${b.total.toLocaleString()}</td>
+      <td><button class="btn btn-red" onclick="deleteBill(${b.id})">🗑</button></td>
+    </tr>`).join('');
+
+  // Group into daily / monthly / yearly totals (auto-saved via retro_bills in localStorage)
+  const daily={}, monthly={}, yearly={};
+  bills.forEach(b=>{
+    daily[b.dateKey]=(daily[b.dateKey]||0)+b.total;
+    const mk=b.dateKey.slice(0,7); monthly[mk]=(monthly[mk]||0)+b.total;
+    const yk=b.dateKey.slice(0,4); yearly[yk]=(yearly[yk]||0)+b.total;
+  });
+
+  document.getElementById('billing-daily').innerHTML = Object.keys(daily).sort().reverse().map(k=>
+    `<tr><td>${k}</td><td>LKR ${daily[k].toLocaleString()}</td></tr>`).join('') || '<tr><td colspan="2" style="color:var(--muted)">No data</td></tr>';
+
+  document.getElementById('billing-monthly').innerHTML = Object.keys(monthly).sort().reverse().map(k=>
+    `<tr><td>${monthLabel(k)}</td><td>LKR ${monthly[k].toLocaleString()}</td></tr>`).join('') || '<tr><td colspan="2" style="color:var(--muted)">No data</td></tr>';
+
+  document.getElementById('billing-yearly').innerHTML = Object.keys(yearly).sort().reverse().map(k=>
+    `<tr><td>${k}</td><td>LKR ${yearly[k].toLocaleString()}</td></tr>`).join('') || '<tr><td colspan="2" style="color:var(--muted)">No data</td></tr>';
+}
+
+// ─── REVIEWS ────────────────────────────────
+let reviewTargetId = null;
+
+function renderReviews(){
+  const reviews=getReviews();
+  document.getElementById('reviews-list').innerHTML = reviews.map(r=>`
+    <div class="review-card" id="rev-${r.id}">
+      <div class="review-header">
+        <div>
+          <div class="review-author">${r.author} <span style="font-size:11px;color:var(--muted);font-weight:400">· ${r.date}</span></div>
+          <div class="review-stars">${'★'.repeat(r.stars)}${'☆'.repeat(5-r.stars)}</div>
+        </div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-blue" onclick="openReviewReply(${r.id})">💬 Reply</button>
+          <button class="btn btn-red" onclick="deleteReview(${r.id})">🗑</button>
+        </div>
+      </div>
+      <div class="review-text">"${r.text}"</div>
+      ${r.reply?`<div class="review-reply" style="display:block">📝 Admin: ${r.reply}</div>`:''}
+    </div>`).join('') || '<p style="color:var(--muted)">No reviews yet.</p>';
+}
+
+function openReviewReply(id){
+  const r=getReviews().find(x=>x.id===id);
+  reviewTargetId=id;
+  document.getElementById('review-preview').innerHTML=`<strong>${r.author}</strong>: "${r.text}"`;
+  document.getElementById('review-reply-text').value=r.reply||'';
+  openModal('modal-review-reply');
+}
+
+function submitReviewReply(){
+  const text=document.getElementById('review-reply-text').value.trim();
+  if(!text){ showToast('Please write a reply.'); return; }
+  const reviews=getReviews();
+  const r=reviews.find(x=>x.id===reviewTargetId);
+  if(r){ r.reply=text; setData('retro_reviews',reviews); }
+  closeModal('modal-review-reply');
+  renderReviews();
+  showToast('Reply posted!');
+}
+
+function deleteReview(id){
+  if(!confirm('Delete this review?')) return;
+  const reviews=getReviews().filter(x=>x.id!==id);
+  setData('retro_reviews',reviews);
+  renderReviews();
+  showToast('Review deleted.');
+}
+
+// ─── CAKES ──────────────────────────────────
+function renderCakes(){
+  const cakes=getCakes();
+  document.getElementById('cake-grid').innerHTML=cakes.map(c=>`
+    <div class="cake-admin-card">
+      <img src="${(c.images&&c.images[0])||'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&q=80'}" alt="${c.name}">
+      <div class="cake-admin-info">
+        <span style="display:inline-block;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);background:rgba(156,102,68,0.1);padding:2px 8px;border-radius:10px;margin-bottom:6px">${c.category||'Uncategorized'}</span>
+        <h4>${c.name}</h4>
+        <p style="font-size:11px;color:var(--muted);margin-bottom:6px">${c.desc||''}</p>
+        <div style="font-size:12px;color:var(--gold);font-weight:600;margin-bottom:8px">From LKR ${minPrice(c).toLocaleString()} · ${(c.sizes||[]).length} size(s) · ${(c.images||[]).length} photo(s)</div>
+        <div class="cake-admin-actions">
+          <button class="btn btn-ghost" onclick="editCake(${c.id})">✏ Edit</button>
+          <button class="btn btn-red" onclick="deleteCake(${c.id})">🗑</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+// ── Gallery + size row state while modal is open ──
+let cakeImages=[];
+let cakeSizes=[];
+
+function renderCakeGallery(){
+  document.getElementById('cake-gallery-list').innerHTML = cakeImages.map((im,i)=>`
+    <div style="position:relative;display:inline-block;margin:0 8px 8px 0;">
+      <img src="${im}" style="width:64px;height:64px;object-fit:cover;border-radius:7px;border:1px solid var(--border);">
+      <button onclick="removeCakeImage(${i})" style="position:absolute;top:-6px;right:-6px;background:var(--red);color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:11px;cursor:pointer;">✕</button>
+    </div>`).join('') || '<p style="font-size:11px;color:var(--muted)">No photos added yet.</p>';
+}
+function addCakeImageUrl(){
+  const val=document.getElementById('cake-img-url').value.trim();
+  if(!val) return;
+  cakeImages.push(val);
+  document.getElementById('cake-img-url').value='';
+  renderCakeGallery();
+}
+function previewCakeImg(e){
+  const files=e.target.files; if(!files||!files.length) return;
+  Array.from(files).forEach(file=>{
+    const reader=new FileReader();
+    reader.onload=ev=>{ cakeImages.push(ev.target.result); renderCakeGallery(); };
+    reader.readAsDataURL(file);
+  });
+  e.target.value='';
+}
+function removeCakeImage(i){ cakeImages.splice(i,1); renderCakeGallery(); }
+
+function renderCakeSizes(){
+  document.getElementById('cake-sizes-list').innerHTML = cakeSizes.map((s,i)=>`
+    <div style="display:grid;grid-template-columns:1.2fr 1fr 0.8fr auto;gap:6px;margin-bottom:8px;align-items:center;">
+      <input type="text" placeholder="Label (e.g. Small 5&quot;)" value="${s.label||''}" oninput="cakeSizes[${i}].label=this.value">
+      <input type="text" placeholder="Weight (optional)" value="${s.weight||''}" oninput="cakeSizes[${i}].weight=this.value">
+      <input type="number" placeholder="Price" value="${s.price||''}" oninput="cakeSizes[${i}].price=parseInt(this.value)||0">
+      <button class="btn btn-red" onclick="removeCakeSize(${i})" style="padding:8px 10px;">✕</button>
+    </div>`).join('');
+}
+function addCakeSize(){ cakeSizes.push({label:'',weight:'',price:0}); renderCakeSizes(); }
+function removeCakeSize(i){ cakeSizes.splice(i,1); renderCakeSizes(); }
+
+function openAddCake(){
+  document.getElementById('cake-modal-title').textContent='Add New Cake';
+  document.getElementById('cake-edit-id').value='';
+  document.getElementById('cake-name').value='';
+  document.getElementById('cake-category').value='Birthday';
+  document.getElementById('cake-desc').value='';
+  document.getElementById('cake-img-url').value='';
+  cakeImages=[];
+  cakeSizes=[{label:'Small 5"',weight:'750g',price:0},{label:'Medium 6"',weight:'700g-1kg',price:0},{label:'Regular 6"',weight:'1kg-1.5kg',price:0},{label:'Large 6"8',weight:'1.5kg-1.75kg',price:0}];
+  renderCakeGallery();
+  renderCakeSizes();
+  openModal('modal-cake');
+}
+
+function editCake(id){
+  const c=getCakes().find(x=>x.id===id);
+  if(!c) return;
+  document.getElementById('cake-modal-title').textContent='Edit Cake';
+  document.getElementById('cake-edit-id').value=id;
+  document.getElementById('cake-name').value=c.name;
+  document.getElementById('cake-category').value=c.category||'Birthday';
+  document.getElementById('cake-desc').value=c.desc||'';
+  document.getElementById('cake-img-url').value='';
+  cakeImages=(c.images||[]).slice();
+  cakeSizes=(c.sizes||[]).map(s=>({...s}));
+  if(cakeSizes.length===0) cakeSizes=[{label:'',weight:'',price:0}];
+  renderCakeGallery();
+  renderCakeSizes();
+  openModal('modal-cake');
+}
+
+function saveCake(){
+  const name=document.getElementById('cake-name').value.trim();
+  const category=document.getElementById('cake-category').value;
+  const desc=document.getElementById('cake-desc').value.trim();
+  const sizes=cakeSizes.filter(s=>s.label && s.price>0);
+  if(!name){ showToast('Cake name is required.'); return; }
+  if(sizes.length===0){ showToast('Add at least one size with a price.'); return; }
+  const images=cakeImages.length?cakeImages:['https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&q=80'];
+  const cakes=getCakes();
+  const editId=document.getElementById('cake-edit-id').value;
+  if(editId){
+    const c=cakes.find(x=>x.id===parseInt(editId));
+    if(c){ c.name=name; c.category=category; c.desc=desc; c.images=images; c.sizes=sizes; }
+  } else {
+    const newId=Math.max(0,...cakes.map(c=>c.id))+1;
+    cakes.push({id:newId,name,category,desc,images,sizes});
+  }
+  setData('retro_cakes',cakes);
+  closeModal('modal-cake');
+  renderCakes();
+  showToast('Cake saved! It will now show on the customer page.');
+}
+
+function deleteCake(id){
+  if(!confirm('Delete this cake?')) return;
+  setData('retro_cakes', getCakes().filter(c=>c.id!==id));
+  renderCakes();
+  showToast('Cake deleted.');
+}
+
+// ─── PARTY THINGS ───────────────────────────
+function renderPartyAdmin(){
+  const items=getParty();
+  document.getElementById('party-grid').innerHTML = items.length===0
+    ? '<p style="color:var(--muted);font-size:13px">No party items yet. Add balloons, candles, sprayers and more.</p>'
+    : items.map(p=>`
+    <div class="cake-admin-card">
+      ${p.img?`<img src="${p.img}" alt="${p.name}">`:'<div style="height:150px;background:rgba(156,102,68,0.08);display:flex;align-items:center;justify-content:center;font-size:32px">🎈</div>'}
+      <div class="cake-admin-info">
+        <h4>${p.name}</h4>
+        <p style="font-size:11px;color:var(--muted);margin-bottom:6px">${p.desc||''}</p>
+        <div class="price-edit">
+          <span style="font-size:11px;color:var(--muted)">LKR</span>
+          <input class="price-input" type="number" value="${p.price}" onchange="updatePartyPrice(${p.id},this.value)">
+        </div>
+        <div class="cake-admin-actions">
+          <button class="btn btn-ghost" onclick="editParty(${p.id})">✏ Edit</button>
+          <button class="btn btn-red" onclick="deleteParty(${p.id})">🗑</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+function updatePartyPrice(id,val){
+  const items=getParty();
+  const p=items.find(x=>x.id===id);
+  if(p){ p.price=parseInt(val)||p.price; setData('retro_party',items); showToast('Price updated!'); }
+}
+function openAddParty(){
+  document.getElementById('party-modal-title').textContent='Add Party Item';
+  document.getElementById('party-edit-id').value='';
+  document.getElementById('party-name').value='';
+  document.getElementById('party-price').value='';
+  document.getElementById('party-desc').value='';
+  document.getElementById('party-img').value='';
+  document.getElementById('party-img-preview').style.display='none';
+  openModal('modal-party');
+}
+function editParty(id){
+  const p=getParty().find(x=>x.id===id);
+  if(!p) return;
+  document.getElementById('party-modal-title').textContent='Edit Party Item';
+  document.getElementById('party-edit-id').value=id;
+  document.getElementById('party-name').value=p.name;
+  document.getElementById('party-price').value=p.price;
+  document.getElementById('party-desc').value=p.desc||'';
+  document.getElementById('party-img').value=p.img||'';
+  const prev=document.getElementById('party-img-preview');
+  if(p.img){ prev.src=p.img; prev.style.display='block'; } else { prev.style.display='none'; }
+  openModal('modal-party');
+}
+function previewPartyImg(e){
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const prev=document.getElementById('party-img-preview');
+    prev.src=ev.target.result; prev.style.display='block';
+    document.getElementById('party-img').value=ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+function saveParty(){
+  const name=document.getElementById('party-name').value.trim();
+  const price=parseInt(document.getElementById('party-price').value)||0;
+  const desc=document.getElementById('party-desc').value.trim();
+  const img=document.getElementById('party-img').value.trim();
+  if(!name||!price){ showToast('Name and price required.'); return; }
+  const items=getParty();
+  const editId=document.getElementById('party-edit-id').value;
+  if(editId){
+    const p=items.find(x=>x.id===parseInt(editId));
+    if(p){ p.name=name; p.price=price; p.desc=desc; if(img) p.img=img; }
+  } else {
+    const newId=Math.max(0,...items.map(p=>p.id))+1;
+    items.push({id:newId,name,price,desc,img});
+  }
+  setData('retro_party',items);
+  closeModal('modal-party');
+  renderPartyAdmin();
+  showToast('Party item saved!');
+}
+function deleteParty(id){
+  if(!confirm('Delete this party item?')) return;
+  setData('retro_party', getParty().filter(p=>p.id!==id));
+  renderPartyAdmin();
+  showToast('Party item deleted.');
+}
+
+// ─── ADS ────────────────────────────────────
+function renderAds(){
+  const ads=getAds();
+  document.getElementById('ads-grid').innerHTML = ads.length===0
+    ? '<p style="color:var(--muted);font-size:13px">No ads yet. Create your first advertisement.</p>'
+    : ads.map(a=>`
+    <div class="ad-card">
+      ${a.img?`<img src="${a.img}" alt="${a.title}">`:'<div style="height:120px;background:rgba(156,102,68,0.08);display:flex;align-items:center;justify-content:center;font-size:30px">📢</div>'}
+      <div class="ad-card-info">
+        <h4>${a.title}</h4>
+        <p>${a.desc}</p>
+        <span class="badge new">${a.tag}</span>
+        <div class="ad-actions" style="margin-top:10px">
+          <button class="btn btn-ghost" onclick="editAd(${a.id})">✏ Edit</button>
+          <button class="btn btn-red" onclick="deleteAd(${a.id})">🗑 Delete</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function openAddAd(){
+  document.getElementById('ad-modal-title').textContent='New Advertisement';
+  document.getElementById('ad-edit-id').value='';
+  document.getElementById('ad-title').value='';
+  document.getElementById('ad-desc').value='';
+  document.getElementById('ad-img').value='';
+  document.getElementById('ad-img-preview').style.display='none';
+  openModal('modal-ad');
+}
+
+function editAd(id){
+  const a=getAds().find(x=>x.id===id);
+  document.getElementById('ad-modal-title').textContent='Edit Advertisement';
+  document.getElementById('ad-edit-id').value=id;
+  document.getElementById('ad-title').value=a.title;
+  document.getElementById('ad-desc').value=a.desc;
+  document.getElementById('ad-img').value=a.img||'';
+  document.getElementById('ad-tag').value=a.tag;
+  const prev=document.getElementById('ad-img-preview');
+  if(a.img){ prev.src=a.img; prev.style.display='block'; } else { prev.style.display='none'; }
+  openModal('modal-ad');
+}
+
+function previewAdImg(e){
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const prev=document.getElementById('ad-img-preview');
+    prev.src=ev.target.result; prev.style.display='block';
+    document.getElementById('ad-img').value=ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function saveAd(){
+  const title=document.getElementById('ad-title').value.trim();
+  const desc=document.getElementById('ad-desc').value.trim();
+  const img=document.getElementById('ad-img').value.trim();
+  const tag=document.getElementById('ad-tag').value;
+  if(!title){ showToast('Title is required.'); return; }
+  const ads=getAds();
+  const editId=document.getElementById('ad-edit-id').value;
+  if(editId){
+    const a=ads.find(x=>x.id===parseInt(editId));
+    if(a){ a.title=title; a.desc=desc; a.img=img; a.tag=tag; }
+  } else {
+    const newId=ads.length>0?Math.max(...ads.map(a=>a.id))+1:1;
+    ads.push({id:newId,title,desc,img,tag});
+  }
+  setData('retro_ads',ads);
+  closeModal('modal-ad');
+  renderAds();
+  showToast('Ad published!');
+}
+
+function deleteAd(id){
+  if(!confirm('Delete this ad?')) return;
+  setData('retro_ads', getAds().filter(a=>a.id!==id));
+  renderAds();
+  showToast('Ad deleted.');
+}
+
+// ─── SETTINGS ───────────────────────────────
+function renderSettings(){
+  const creds=getCreds();
+  document.getElementById('set-current-pass').value='';
+  document.getElementById('set-new-user').value='';
+  document.getElementById('set-new-user').placeholder='Current: '+creds.user;
+  document.getElementById('set-new-pass').value='';
+  document.getElementById('set-new-pass-confirm').value='';
+}
+
+function saveSettings(){
+  const creds=getCreds();
+  const currentPass=document.getElementById('set-current-pass').value;
+  const newUser=document.getElementById('set-new-user').value.trim();
+  const newPass=document.getElementById('set-new-pass').value;
+  const newPassConfirm=document.getElementById('set-new-pass-confirm').value;
+
+  if(currentPass!==creds.pass){ showToast('Current password is incorrect.'); return; }
+  if(!newUser && !newPass){ showToast('Enter a new username or password to change.'); return; }
+  if(newPass && newPass!==newPassConfirm){ showToast('New passwords do not match.'); return; }
+  if(newPass && newPass.length<4){ showToast('New password must be at least 4 characters.'); return; }
+
+  const updated={ user: newUser||creds.user, pass: newPass||creds.pass };
+  setCreds(updated);
+  showToast('Settings saved! Please log in again.');
+  renderSettings();
+  setTimeout(doLogout, 900);
+}
+
+// ─── UTILS ──────────────────────────────────
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+
+document.querySelectorAll('.modal-bg').forEach(bg=>{
+  bg.addEventListener('click', e=>{ if(e.target===bg) bg.classList.remove('open'); });
+});
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.style.display='block';
+  clearTimeout(window._toastTimer);
+  window._toastTimer=setTimeout(()=>{ t.style.display='none'; }, 2800);
+}
+</script>
+</body>
+</html>
